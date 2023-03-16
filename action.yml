@@ -52,5 +52,5 @@ runs:
       id: matrix
       shell: bash
       run: |
-        matrix=$(echo ${{ steps.affected.outputs.affected }} | jq -c '{include:[.[] | select(.component_path=="components/terraform/base-property")]}')
+        matrix=$(echo ${{ steps.affected.outputs.affected }} | jq -c '{include:[.[]]}')
         echo "matrix=$matrix" >> $GITHUB_OUTPUT
