@@ -1,23 +1,53 @@
-name: 'Example composite GitHub action'
-description: 'Example composite GitHub action'
+name: "Atmos Affected Stacks"
+description: "A GitHub Action to determine the affected stacks for a given pull request"
 author: hello@cloudposse.com
 branding:
-  icon: 'file'
-  color: 'white'
+  icon: "file"
+  color: "white"
 inputs:
-  param1:
-    required: true
-    description: "Input parameter placeholder"
-    default: "true"
+  head-ref:
+    description: The head ref to checkout. If not provided, the head default branch is used.
+    required: false
+  default-branch:
+    description: The default branch to use for the base ref.
+    required: false
+    default: ${{ github.event.repository.default_branch }}
 outputs:
-  result1:
-    description: "Output result placeholder"
-    value: "${{ steps.context.outputs.action-result }}"
+  affected:
+    description: The affected stacks
+    value: ${{ steps.affected.outputs.affected }}
+  has-affected-stacks:
+    description: Whether there are affected stacks
+    value: ${{ steps.affected.outputs.affected != '[]' }}
+  matrix:
+    description: A matrix suitable for use for GitHub Actions of the affected stacks
+    value: ${{ steps.matrix.outputs.matrix }}
+
 runs:
   using: "composite"
   steps:
-    - id: context
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.default-branch }}
+        path: main-branch
+        fetch-depth: 0
+
+    - name: checkout head ref
+      id: head-ref
+      shell: bash
+      run: git checkout ${{ inputs.head-ref }}
+      working-directory: main-branch
+
+    - name: atmos affected stacks
+      id: affected
       shell: bash
       run: |
-          echo "::set-output name=action-result::${{ inputs.param1 }}"
+        affected=$(atmos describe affected --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" | jq -c '.')
+        echo "affected='$affected'" >> $GITHUB_OUTPUT
 
+    - name: buiild matrix
+      id: matrix
+      shell: bash
+      run: |
+        matrix=$(echo ${{ steps.affected.outputs.affected }} | jq -c '{include:[.[] | select(.component_path=="components/terraform/base-property")]}')
+        echo "matrix=$matrix" >> $GITHUB_OUTPUT
