@@ -42,7 +42,7 @@ runs:
       id: affected
       shell: bash
       run: |
-        affected=$(atmos describe affected --file affected.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" | jq -c '.')
+        affected=$(atmos describe affected --file affected.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch")
         affected=$(jq -c '.' < $(echo affected.json))
         rm -f affected.json
         echo "affected='$affected'" >> $GITHUB_OUTPUT
