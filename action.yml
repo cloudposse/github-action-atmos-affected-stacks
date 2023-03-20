@@ -15,15 +15,15 @@ inputs:
   install-atmos:
     description: Whether to install atmos
     required: false
-    default: "false"
+    default: "true"
   atmos-version:
     description: The version of atmos to install if install-atmos is true
     required: true
     default: "latest"
   install-terraform:
     description: Whether to install terraform
-    required: true
-    default: "false"
+    required: false
+    default: "true"
   terraform-version:
     description: The version of terraform to install if install-terraform is true
     required: false
