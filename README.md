@@ -101,7 +101,7 @@ raw list of affected stacks as an output as well as a matrix that can be used fu
 
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
-| atmos-version | The version of atmos to install if install-atmos is true | latest | true |
+| atmos-version | The version of atmos to install if install-atmos is true | latest | false |
 | default-branch | The default branch to use for the base ref. | ${{ github.event.repository.default\_branch }} | false |
 | head-ref | The head ref to checkout. If not provided, the head default branch is used. | N/A | false |
 | install-atmos | Whether to install atmos | true | false |
