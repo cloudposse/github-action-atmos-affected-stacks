@@ -1,10 +1,10 @@
-name: Test example positive
+name: Test atmos-affected-stacks negative
 on:
-#  # Uncomment when test added first time to register workflow and comment it back after workflow would be registered
-#  #
-#  # Added pull_request to register workflow from the PR.
-#  # Read more https://stackoverflow.com/questions/63362126/github-actions-how-to-run-a-workflow-created-on-a-non-master-branch-from-the-wo
-#  pull_request: {}
+  #  # Uncomment when test added first time to register workflow and comment it back after workflow would be registered
+  #  #
+  #  # Added pull_request to register workflow from the PR.
+  #  # Read more https://stackoverflow.com/questions/63362126/github-actions-how-to-run-a-workflow-created-on-a-non-master-branch-from-the-wo
+  pull_request: {}
   workflow_dispatch: {}
 
 jobs:
@@ -16,19 +16,18 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    continue-on-error: true
     needs: [setup]
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - uses: ./
         id: current
-        with:
-          param1: 'true'
 
     outputs:
-      result: "${{ steps.current.outputs.result1 }}"
+      affected: "${{ steps.current.outputs.affected }}"
+      matrix: "${{ steps.current.outputs.matrix }}"
 
   assert:
     runs-on: ubuntu-latest
@@ -36,8 +35,12 @@ jobs:
     steps:
       - uses: nick-fields/assert-action@v1
         with:
-          expected: 'true'
-          actual: "${{ needs.test.outputs.result }}"
+          expected: "[]"
+          actual: "${{ needs.test.outputs.affected }}"
+      - uses: nick-fields/assert-action@v1
+        with:
+          expected: "{include:[]}"
+          actual: "${{ needs.test.outputs.matrix }}"
 
   teardown:
     runs-on: ubuntu-latest
