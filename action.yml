@@ -5,13 +5,41 @@ branding:
   icon: "file"
   color: "white"
 inputs:
-  head-ref:
-    description: The head ref to checkout. If not provided, the head default branch is used.
-    required: false
   default-branch:
     description: The default branch to use for the base ref.
     required: false
     default: ${{ github.event.repository.default_branch }}
+  head-ref:
+    description: The head ref to checkout. If not provided, the head default branch is used.
+    required: false
+  install-atmos:
+    description: Whether to install atmos
+    required: false
+    default: "false"
+  atmos-version:
+    description: The version of atmos to install if install-atmos is true
+    required: false
+    default: "latest"
+  install-terraform:
+    description: Whether to install terraform
+    required: false
+    default: "false"
+  terraform-version:
+    description: The version of terraform to install if install-terraform is true
+    required: false
+    default: "latest"
+  install-jq:
+    description: Whether to install jq
+    required: false
+    default: "false"
+  jq-version:
+    description: The version of jq to install if install-jq is true
+    required: false
+    default: "1.6"
+  jq-force:
+    description: Whether to force the installation of jq
+    required: false
+    default: "true"
 outputs:
   affected:
     description: The affected stacks
@@ -26,6 +54,25 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - if: ${{ inputs.install-terraform == 'true' }}
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ inputs.terraform-version }}
+
+    - if: ${{ inputs.install-atmos == 'true' }}
+      uses: cloudposse/github-action-setup-atmos@v1.0.0
+      with:
+        atmos-version: ${{ inputs.atmos-version }}
+
+    - if: ${{ inputs.install-jq == 'true' }}
+      uses: dcarbone/install-jq-action@v1.0.1
+      with:
+        version: ${{ inputs.jq-version }}
+        force: ${{ inputs.jq-force }}
+
+    # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
+    # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
+    # look at the contents of the stack files to determine if any have changed.
     - uses: actions/checkout@v3
       with:
         ref: ${{ inputs.default-branch }}
