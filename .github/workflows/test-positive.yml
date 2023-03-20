@@ -1,4 +1,4 @@
-name: Test atmos-affected-stacks negative
+name: Test atmos-affected-stacks positive
 on:
   #  # Uncomment when test added first time to register workflow and comment it back after workflow would be registered
   #  #
