@@ -97,6 +97,7 @@ runs:
       run: |
         pwd
         ls -latr
+        ls -l /home/runner/work/infra-live/infra-live/rootfs/usr/local/etc/atmos/atmos.yaml
         atmos describe affected --file affected.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
         cat affected.json
         affected=$(jq -c '.' < affected.json)
