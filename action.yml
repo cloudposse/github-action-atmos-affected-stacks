@@ -94,6 +94,8 @@ runs:
     - name: atmos affected stacks
       id: affected
       shell: bash
+      with:
+        ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       run: |
         atmos describe affected --file affected.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
         cat affected.json
