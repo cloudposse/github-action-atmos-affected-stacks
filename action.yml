@@ -65,6 +65,8 @@ runs:
 
     - if: ${{ inputs.install-atmos == 'true' }}
       uses: cloudposse/github-action-setup-atmos@v1.0.0
+      env:
+       ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       with:
         atmos-version: ${{ inputs.atmos-version }}
 
@@ -92,8 +94,6 @@ runs:
     - name: atmos affected stacks
       id: affected
       shell: bash
-      env:
-       ATMOS_CLI_CONFIG_PATH: ${{ github.workspace }}/${{inputs.atmos-config-path}}
       run: |
         atmos describe affected --file affected.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
         cat affected.json
