@@ -64,9 +64,9 @@ runs:
         terraform_version: ${{ inputs.terraform-version }}
 
     - if: ${{ inputs.install-atmos == 'true' }}
-      uses: cloudposse/github-action-setup-atmos@bug/fix-node-requirement-in-atmos
+      uses: cloudposse/github-action-setup-atmos@v1.0.0
       env:
-       ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
+        ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       with:
         install-wrapper: false
         atmos-version: ${{ inputs.atmos-version }}
