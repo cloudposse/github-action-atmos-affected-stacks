@@ -97,13 +97,11 @@ runs:
       env:
         ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       run: |
-        atmos describe affected --file affected.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
-        cat affected.json
-        affected=$(jq -c '.' < affected.json)
-        rm -f affected.json
-        echo "affected='$affected'" >> $GITHUB_OUTPUT
+        atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
+        affected=$(jq -c '.' < affected-stacks.json)
+        printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
-    - name: buiild matrix
+    - name: build matrix
       id: matrix
       shell: bash
       run: |
