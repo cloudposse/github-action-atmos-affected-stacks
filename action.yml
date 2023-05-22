@@ -69,6 +69,7 @@ runs:
        ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       with:
         atmos-version: ${{ inputs.atmos-version }}
+        install-wrapper: false
 
     - if: ${{ inputs.install-jq == 'true' }}
       uses: dcarbone/install-jq-action@v1.0.1
