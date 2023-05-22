@@ -33,7 +33,7 @@ jobs:
           install-atmos: false
           atmos-config-path: "./components/terraform/test"
         env:
-          PATH: "${GITHUB_ACTION_PATH}/fixtures:$PATH"
+          PATH: "${{env.GITHUB_ACTION_PATH}}/fixtures:${{env.PATH}}"
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
       matrix: "${{ steps.current.outputs.matrix }}"
