@@ -25,7 +25,10 @@ jobs:
       - uses: ./
         id: current
         with:
+          install-atmos: false
           atmos-config-path: "./components/terraform/test"
+        env:
+          PATH: "${GITHUB_ACTION_PATH}/fixtures:$PATH"
 
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
