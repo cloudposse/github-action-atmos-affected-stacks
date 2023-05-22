@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: add mock atmos to the path
-        run: echo "${{github.action_path}}/fixtures" >> $GITHUB_PATH
+        run: echo "./fixtures" >> $GITHUB_PATH
 
       - uses: ./
         id: current
