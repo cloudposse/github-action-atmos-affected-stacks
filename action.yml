@@ -105,5 +105,5 @@ runs:
       id: matrix
       shell: bash
       run: |
-        matrix=$(echo ${{ steps.affected.outputs.affected }} | jq -c '{include:[.[]]}')
+        matrix=$(jq -c '{include:[.[]]}' < affected-stacks.json)
         echo "matrix=$matrix" >> $GITHUB_OUTPUT
