@@ -37,11 +37,9 @@ jobs:
     steps:
       - uses: nick-fields/assert-action@v1
         with:
-          expected: "'[]'"
+          expected: "[]"
           actual: "${{ needs.test.outputs.affected }}"
       - uses: nick-fields/assert-action@v1
         with:
           expected: '{"include":[]}'
           actual: "${{ needs.test.outputs.matrix }}"
-
-
