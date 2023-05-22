@@ -22,18 +22,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - run: |
-          echo $PATH
-          echo "${GITHUB_ACTION_PATH}/fixtures:$PATH"
-          which unzip
+      - name: add mock atmos to the path
+        run: echo "${{github.action_path}}/fixtures" >> $GITHUB_PATH
 
       - uses: ./
         id: current
         with:
           install-atmos: false
           atmos-config-path: "./components/terraform/test"
-        env:
-          PATH: "${{github.action_path}}/fixtures:$(cat ${{github.path}})"
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
       matrix: "${{ steps.current.outputs.matrix }}"
