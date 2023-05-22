@@ -22,6 +22,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - run: |
+          echo $PATH
+          echo "${GITHUB_ACTION_PATH}/fixtures:$PATH"
+          which unzip
+
       - uses: ./
         id: current
         with:
@@ -29,7 +34,6 @@ jobs:
           atmos-config-path: "./components/terraform/test"
         env:
           PATH: "${GITHUB_ACTION_PATH}/fixtures:$PATH"
-
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
       matrix: "${{ steps.current.outputs.matrix }}"
