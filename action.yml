@@ -24,6 +24,10 @@ inputs:
     description: The path to the atmos.yaml file
     required: false
     default: atmos.yaml
+  atmos-include-spacelift-admin-stacks:
+    description: Whether to include the Spacelift admin stacks of affected stacks in the output
+    required: false
+    default: "true"
   install-terraform:
     description: Whether to install terraform
     required: false
@@ -98,7 +102,11 @@ runs:
       env:
         ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       run: |
-        atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
+        if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-spacelift-admin-stacks=true
+        else
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
+        fi
         affected=$(jq -c '.' < affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
