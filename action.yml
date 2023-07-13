@@ -102,7 +102,7 @@ runs:
       env:
         ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       run: |
-        if [[ ${{ inputs.atmos-include-spacelift-admin-stacks }} == "true" ]]; then
+        if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
           atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-spacelift-admin-stacks=true
         else
           atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
