@@ -27,7 +27,7 @@ inputs:
   atmos-include-spacelift-admin-stacks:
     description: Whether to include the Spacelift admin stacks of affected stacks in the output
     required: false
-    default: "true"
+    default: "false"
   install-terraform:
     description: Whether to install terraform
     required: false
