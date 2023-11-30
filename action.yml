@@ -57,7 +57,7 @@ outputs:
     value: ${{ steps.affected.outputs.affected != '[]' }}
   matrix:
     description: A matrix suitable for use for GitHub Actions of the affected stacks
-    value: ${{ steps.matrix.outputs.matrix }}
+    value: ${{ steps.matrix.outputs.output }}
 
 runs:
   using: "composite"
@@ -110,9 +110,22 @@ runs:
         affected=$(jq -c '.' < affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
-    - name: build matrix
-      id: matrix
-      shell: bash
-      run: |
-        matrix=$(jq -c '{include:[.[]]}' < affected-stacks.json)
-        echo "matrix=$matrix" >> $GITHUB_OUTPUT
+    - id: matrix
+      uses: cloudposse/github-action-jq@v0
+      with:
+        compact: true
+        input: affected-stacks.json
+        script: |-
+          def name: ${{ inputs.sort-by }};
+          def group: ${{ inputs.group-by }};
+          def chunk: .key / 256 | floor;
+          def group_name: [(.value | group), (chunk | if . == 0 then empty else . end)] | join(" ");
+          
+          sort_by(name) | 
+          group_by(group) |
+          map( to_entries | group_by(chunk) | 
+              map({
+                "name": first | group_name,
+                "items": map(.value) | {"include": . } | tostring
+              })
+          ) | flatten | { "include": . }
