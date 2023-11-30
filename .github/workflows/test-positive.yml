@@ -43,6 +43,7 @@ jobs:
           expected: '{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"core-gbl-dns","stack_slug":"core-gbl-dns-datadog-integration","spacelift_stack":"core-gbl-dns-datadog-integration","affected":"component"}'
           actual: "${{ needs.test.outputs.affected }}"
           comparison: contains
+
       - uses: nick-fields/assert-action@v1
         with:
           expected: '{"include":['
