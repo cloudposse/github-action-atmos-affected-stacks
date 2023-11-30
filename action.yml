@@ -48,6 +48,14 @@ inputs:
     description: Whether to force the installation of jq
     required: false
     default: "true"
+  sort-by:
+    required: false
+    description: 'Sort by query'
+    default: '.stack_slug'
+  group-by:
+    required: false
+    description: 'Group by query'
+    default: '.stack_slug | split("-") | [.[0], .[2]] | join("-")'
 outputs:
   affected:
     description: The affected stacks
