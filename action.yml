@@ -115,7 +115,7 @@ runs:
         else
           atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
         fi
-        affected=$(jq -c '.' < affected-stacks.json)
+        affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
     - id: matrix
