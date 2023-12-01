@@ -56,6 +56,10 @@ inputs:
     required: false
     description: 'Group by query'
     default: '.stack_slug | split("-") | [.[0], .[2]] | join("-")'
+  nested-matrices-count:
+    required: false
+    description: 'Matrices nested levels count (from 1 to 3)'
+    default: "1"
 outputs:
   affected:
     description: The affected stacks
@@ -118,22 +122,16 @@ runs:
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
+    - uses: cloudposse/github-action-matrix-unlimited-jq-query@v0
+      id: query
+      with:
+        sort-by: ${{ inputs.sort-by }}
+        group-by: ${{ inputs.group-by }}
+        nested-matrices-count: ${{ inputs.nested-matrices-count }}
+
     - id: matrix
       uses: cloudposse/github-action-jq@v0
       with:
         compact: true
         input: affected-stacks.json
-        script: |-
-          def name: ${{ inputs.sort-by }};
-          def group: ${{ inputs.group-by }};
-          def chunk: .key / 256 | floor;
-          def group_name: [(.value | group), (chunk | if . == 0 then empty else . end)] | join(" ");
-          
-          sort_by(name) | 
-          group_by(group) |
-          map( to_entries | group_by(chunk) | 
-              map({
-                "name": first | group_name,
-                "items": map(.value) | {"include": . } | tostring
-              })
-          ) | flatten | { "include": . }
+        script: ${{ steps.query.outputs.query }}
