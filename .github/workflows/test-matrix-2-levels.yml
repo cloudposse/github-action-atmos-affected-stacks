@@ -29,7 +29,7 @@ jobs:
         id: current
         with:
           install-atmos: false
-          atmos-config-path: "./tests/components/terraform/test"
+          atmos-gitops-config-path: "./tests/atmos-gitops.yaml"
           nested-matrices-count: '2'
 
     outputs:
