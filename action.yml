@@ -47,7 +47,7 @@ inputs:
   nested-matrices-count:
     required: false
     description: 'Matrices nested levels count (from 1 to 3)'
-    default: "1"
+    default: "2"
 outputs:
   affected:
     description: The affected stacks
