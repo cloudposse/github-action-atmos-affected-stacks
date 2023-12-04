@@ -23,13 +23,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: add mock atmos to the path
-        run: echo "./fixtures" >> $GITHUB_PATH
+        run: echo "./tests/fixtures" >> $GITHUB_PATH
 
       - uses: ./
         id: current
         with:
           install-atmos: false
-          atmos-config-path: "./components/terraform/test"
+          atmos-config-path: "./tests/components/terraform/test"
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
       matrix: "${{ steps.current.outputs.matrix }}"
