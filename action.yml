@@ -1,5 +1,5 @@
 name: "Atmos Affected Stacks"
-description: "A GitHub Action to determine the affected stacks for a given pull request"
+description: "A GitHub Action to determine the affected stacks between two git refs"
 author: hello@cloudposse.com
 branding:
   icon: "file"
