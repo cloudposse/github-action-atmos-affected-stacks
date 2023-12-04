@@ -7,3 +7,5 @@ terraform-plan-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-git
 terraform-apply-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
 terraform-version: 1.5.2
 aws-region: us-east-2
+sort-by: .stack_slug
+group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
