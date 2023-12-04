@@ -16,14 +16,10 @@ inputs:
     description: Whether to install atmos
     required: false
     default: "true"
-  atmos-version:
-    description: The version of atmos to install if install-atmos is true
+  atmos-gitops-config-path:
+    description: The path to the atmos-gitops.yaml file
     required: false
-    default: "latest"
-  atmos-config-path:
-    description: The path to the atmos.yaml file
-    required: false
-    default: atmos.yaml
+    default: ./.github/config/atmos-gitops.yaml
   atmos-include-spacelift-admin-stacks:
     description: Whether to include the Spacelift admin stacks of affected stacks in the output
     required: false
@@ -32,10 +28,6 @@ inputs:
     description: Whether to install terraform
     required: false
     default: "true"
-  terraform-version:
-    description: The version of terraform to install if install-terraform is true
-    required: false
-    default: "latest"
   install-jq:
     description: Whether to install jq
     required: false
@@ -48,14 +40,6 @@ inputs:
     description: Whether to force the installation of jq
     required: false
     default: "true"
-  sort-by:
-    required: false
-    description: 'Sort by query'
-    default: '.stack_slug'
-  group-by:
-    required: false
-    description: 'Group by query'
-    default: '.stack_slug | split("-") | [.[0], .[2]] | join("-")'
   nested-matrices-count:
     required: false
     description: 'Matrices nested levels count (from 1 to 3)'
@@ -74,17 +58,24 @@ outputs:
 runs:
   using: "composite"
   steps:
+
+    - name: config
+      uses: blablacar/action-config-levels@dc8ddbca36875e29f870e53bcc1160b7000ff5b2
+      id: config
+      with:
+        output_properties: true
+        patterns: |
+          - ./.github/config/atmos-gitops.yaml
+
     - if: ${{ inputs.install-terraform == 'true' }}
       uses: hashicorp/setup-terraform@v2
       with:
-        terraform_version: ${{ inputs.terraform-version }}
+        terraform_version: ${{ steps.config.outputsterraform-version }}
 
     - if: ${{ inputs.install-atmos == 'true' }}
       uses: cloudposse/github-action-setup-atmos@v1.0.0
-      env:
-       ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       with:
-        atmos-version: ${{ inputs.atmos-version }}
+        atmos-version: ${{ steps.config.outputs.atmos-version }}
         install-wrapper: false
 
     - if: ${{ inputs.install-jq == 'true' }}
@@ -112,7 +103,7 @@ runs:
       id: affected
       shell: bash
       env:
-        ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
+        ATMOS_CLI_CONFIG_PATH: ${{ steps.config.outputs.atmos-config-path }}
       run: |
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
           atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-spacelift-admin-stacks=true
@@ -125,8 +116,8 @@ runs:
     - uses: cloudposse/github-action-matrix-unlimited-jq-query@v0
       id: query
       with:
-        sort-by: ${{ inputs.sort-by }}
-        group-by: ${{ inputs.group-by }}
+        sort-by: ${{ steps.config.outputs.sort-by }}
+        group-by: ${{ steps.config.outputs.group-by }}
         nested-matrices-count: ${{ inputs.nested-matrices-count }}
 
     - id: matrix
