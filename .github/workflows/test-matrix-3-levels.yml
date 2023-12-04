@@ -30,7 +30,6 @@ jobs:
         with:
           install-atmos: false
           atmos-gitops-config-path: "./tests/atmos-gitops.yaml"
-          head-ref: ${{ github.sha }}
           nested-matrices-count: '3'
 
     outputs:
