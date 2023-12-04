@@ -65,7 +65,7 @@ runs:
       with:
         output_properties: true
         patterns: |
-          - ./.github/config/atmos-gitops.yaml
+          - ${{ inputs.atmos-gitops-config-path }}
 
     - if: ${{ inputs.install-terraform == 'true' }}
       uses: hashicorp/setup-terraform@v2
