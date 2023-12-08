@@ -111,7 +111,7 @@ raw list of affected stacks as an output as well as a matrix that can be used fu
 | install-terraform | Whether to install terraform | true | false |
 | jq-force | Whether to force the installation of jq | true | false |
 | jq-version | The version of jq to install if install-jq is true | 1.6 | false |
-| nested-matrices-count | Matrices nested levels count (from 1 to 3) | 1 | false |
+| nested-matrices-count | Matrices nested levels count (from 1 to 3) | 2 | false |
 
 
 ## Outputs
