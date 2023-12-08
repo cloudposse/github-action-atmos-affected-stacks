@@ -57,7 +57,7 @@ outputs:
     value: ${{ steps.affected.outputs.affected != '[]' }}
   matrix:
     description: A matrix suitable for use for GitHub Actions of the affected stacks
-    value: ${{ steps.matrix.outputs.output }}
+    value: ${{ steps.matrix.outputs.matrix }}
 
 runs:
   using: "composite"
@@ -124,16 +124,10 @@ runs:
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
-    - uses: cloudposse/github-action-matrix-unlimited-jq-query@v0
-      id: query
+    - uses: cloudposse/github-action-matrix-extended@incapsulate-jq
+      id: matrix
       with:
+        matrix: affected-stacks.json
         sort-by: ${{ steps.config.outputs.sort-by }}
         group-by: ${{ steps.config.outputs.group-by }}
         nested-matrices-count: ${{ inputs.nested-matrices-count }}
-
-    - id: matrix
-      uses: cloudposse/github-action-jq@v0
-      with:
-        compact: true
-        input: affected-stacks.json
-        script: ${{ steps.query.outputs.query }}
