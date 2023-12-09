@@ -1,3 +1,0 @@
-#!/bin/bash
-
-cat "${GITHUB_ACTION_PATH}/fixtures/mock-atmos-describe-affected.json" > affected-stacks.json
