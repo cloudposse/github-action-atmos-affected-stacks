@@ -149,7 +149,7 @@ The config should have the following structure:
 | `enable-infracost`       |
 
   
-If you want `v1` having the same behaviour as `v0` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v0` inputs.
+If you want the same behavior in `v1`  as in`v0` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v0` inputs.
 
 ```yaml
   - name: Determine Affected Stacks
