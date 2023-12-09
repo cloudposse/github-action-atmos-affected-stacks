@@ -43,7 +43,10 @@ references: []
 
 # How to use this project
 usage: |-
-  The action expects the atmos gitops configuration file to be present in the repository in `./.github/atmos-gitops.yaml`.
+  
+  ### Config
+
+  The action expects the atmos gitops configuration file to be present in the repository in `./.github/config/atmos-gitops.yaml`.
   The config should have the following structure:
   
   ```yaml
@@ -61,6 +64,8 @@ usage: |-
     group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
   ```
   
+  ### Workflow example
+  
   ```yaml
     name: Pull Request
     on:
@@ -74,9 +79,9 @@ usage: |-
         steps:
           - uses: actions/checkout@v3
           - id: affected
-            uses: cloudposse/github-action-atmos-affected-stacks@v1
+            uses: cloudposse/github-action-atmos-affected-stacks@v2
             with:
-              atmos-gitops-config-path: ./.github/atmos-gitops.yaml
+              atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
               nested-matrices-count: 1
 
         outputs:
@@ -104,9 +109,9 @@ usage: |-
               stack: ${{ matrix.stack }}
   ```
     
-  ## Migrate `v0` to `v1`
+  ### Migrate from `v1` to `v2`
   
-  `v1` moved variables from `inputs` to atmos gitops config path `./.github/atmos-gitops.yaml`
+  `v2` moved variables from `inputs` to atmos gitops config path `./.github/config/atmos-gitops.yaml`
   
   |         name             |
   |--------------------------|
@@ -122,21 +127,21 @@ usage: |-
   | `enable-infracost`       |
   
     
-  If you want `v1` having the same behaviour as `v0` you should create config `./.github/atmos-gitops.yaml` with the same variables as in `v0` inputs.
+  If you want `v2` having the same behaviour as `v1` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v1` inputs.
   
   ```yaml
     - name: Determine Affected Stacks
-      uses: cloudposse/github-action-atmos-affected-stacks@v1
+      uses: cloudposse/github-action-atmos-affected-stacks@v2
       id: affected
       with:
-        atmos-gitops-config-path: ./.github/atmos-gitops.yaml
+        atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
   ```
   
   same behaviour as
   
   ```yaml
     - name: Determine Affected Stacks
-      uses: cloudposse/github-action-atmos-affected-stacks@v0
+      uses: cloudposse/github-action-atmos-affected-stacks@v1
       id: affected
       with:
         atmos-version: 1.45.3

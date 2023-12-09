@@ -70,7 +70,7 @@ raw list of affected stacks as an output as well as a matrix that can be used fu
 
 
 
-The action expects the atmos gitops configuration file to be present in the repository in `./.github/atmos-gitops.yaml`.
+The action expects the atmos gitops configuration file to be present in the repository in `./.github/config/atmos-gitops.yaml`.
 The config should have the following structure:
 
 ```yaml
@@ -103,7 +103,7 @@ The config should have the following structure:
         - id: affected
           uses: cloudposse/github-action-atmos-affected-stacks@v1
           with:
-            atmos-gitops-config-path: ./.github/atmos-gitops.yaml
+            atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
             nested-matrices-count: 1
 
       outputs:
@@ -133,7 +133,7 @@ The config should have the following structure:
   
 ## Migrate `v0` to `v1`
 
-`v1` moved variables from `inputs` to atmos gitops config path `./.github/atmos-gitops.yaml`
+`v1` moved variables from `inputs` to atmos gitops config path `./.github/config/atmos-gitops.yaml`
 
 |         name             |
 |--------------------------|
@@ -149,14 +149,14 @@ The config should have the following structure:
 | `enable-infracost`       |
 
   
-If you want `v1` having the same behaviour as `v0` you should create config `./.github/atmos-gitops.yaml` with the same variables as in `v0` inputs.
+If you want `v1` having the same behaviour as `v0` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v0` inputs.
 
 ```yaml
   - name: Determine Affected Stacks
     uses: cloudposse/github-action-atmos-affected-stacks@v1
     id: affected
     with:
-      atmos-gitops-config-path: ./.github/atmos-gitops.yaml
+      atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
 ```
 
 same behaviour as
