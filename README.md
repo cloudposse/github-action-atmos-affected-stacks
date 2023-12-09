@@ -70,6 +70,24 @@ raw list of affected stacks as an output as well as a matrix that can be used fu
 
 
 
+The action expects the atmos gitops configuration file to be present in the repository in `./.github/atmos-gitops.yaml`.
+The config should have the following structure:
+
+```yaml
+  atmos-version: 1.45.3
+  atmos-config-path: ./rootfs/usr/local/etc/atmos/
+  terraform-state-bucket: cptest-core-ue2-auto-gitops
+  terraform-state-table: cptest-core-ue2-auto-gitops
+  terraform-state-role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+  terraform-plan-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+  terraform-apply-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+  terraform-version: 1.5.2
+  aws-region: us-east-2
+  enable-infracost: false
+  sort-by: .stack_slug
+  group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
+```
+
 ```yaml
   name: Pull Request
   on:
@@ -83,11 +101,81 @@ raw list of affected stacks as an output as well as a matrix that can be used fu
       steps:
         - uses: actions/checkout@v3
         - id: affected
-          uses: cloudposse/github-action-atmos-affected-stacks@feature/initial-implementation
+          uses: cloudposse/github-action-atmos-affected-stacks@v1
+          with:
+            atmos-gitops-config-path: ./.github/atmos-gitops.yaml
+            nested-matrices-count: 1
 
       outputs:
         affected: ${{ steps.affected.outputs.affected }}
         matrix: ${{ steps.affected.outputs.matrix }}
+
+    atmos-plan:
+      needs: ["atmos-affected"]
+      if: ${{ needs.atmos-affected.outputs.has-affected-stacks }}
+      name: ${{ matrix.stack_slug }}
+      runs-on: ['self-hosted']
+      strategy:
+        max-parallel: 10
+        fail-fast: false # Don't fail fast to avoid locking TF State
+        matrix: ${{ fromJson(needs.atmos-affected.outputs.stacks) }}
+      ## Avoid running the same stack in parallel mode (from different workflows)
+      concurrency:
+        group: ${{ matrix.stack_slug }}
+        cancel-in-progress: false
+      steps:
+        - name: Plan Atmos Component
+          uses: cloudposse/github-action-atmos-terraform-plan@incapsulate-configs
+          with:
+            component: ${{ matrix.component }}
+            stack: ${{ matrix.stack }}
+```
+  
+## Migrate `v0` to `v1`
+
+`v1` moved variables from `inputs` to atmos gitops config path `./.github/atmos-gitops.yaml`
+
+|         name             |
+|--------------------------|
+| `atmos-version`          |
+| `atmos-config-path`      |
+| `terraform-state-bucket` |
+| `terraform-state-table`  |
+| `terraform-state-role`   |
+| `terraform-plan-role`    |
+| `terraform-apply-role`   |
+| `terraform-version`      |
+| `aws-region`             |
+| `enable-infracost`       |
+
+  
+If you want `v1` having the same behaviour as `v0` you should create config `./.github/atmos-gitops.yaml` with the same variables as in `v0` inputs.
+
+```yaml
+  - name: Determine Affected Stacks
+    uses: cloudposse/github-action-atmos-affected-stacks@v1
+    id: affected
+    with:
+      atmos-gitops-config-path: ./.github/atmos-gitops.yaml
+```
+
+same behaviour as
+
+```yaml
+  - name: Determine Affected Stacks
+    uses: cloudposse/github-action-atmos-affected-stacks@v0
+    id: affected
+    with:
+      atmos-version: 1.45.3
+      atmos-config-path: ./rootfs/usr/local/etc/atmos/
+      terraform-state-bucket: cptest-core-ue2-auto-gitops
+      terraform-state-table: cptest-core-ue2-auto-gitops
+      terraform-state-role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+      terraform-plan-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+      terraform-apply-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+      terraform-version: 1.5.2
+      aws-region: us-east-2
+      enable-infracost: false
 ```
 
 
