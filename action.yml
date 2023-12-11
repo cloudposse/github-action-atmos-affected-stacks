@@ -54,7 +54,7 @@ outputs:
     value: ${{ steps.affected.outputs.affected }}
   has-affected-stacks:
     description: Whether there are affected stacks
-    value: ${{ steps.affected.outputs.affected != '[]' || steps.affected.outputs.affected != '' }}
+    value: ${{ steps.affected.outputs.affected != '[]' && steps.affected.outputs.affected != '' }}
   matrix:
     description: A matrix suitable for use for GitHub Actions of the affected stacks
     value: ${{ steps.matrix.outputs.matrix }}
