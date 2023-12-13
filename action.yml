@@ -124,7 +124,7 @@ runs:
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
-    - uses: cloudposse/github-action-matrix-extended@incapsulate-jq
+    - uses: cloudposse/github-action-matrix-extended@v0
       id: matrix
       with:
         matrix: affected-stacks.json
