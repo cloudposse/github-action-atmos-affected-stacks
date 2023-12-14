@@ -56,7 +56,7 @@ outputs:
     description: Whether there are affected stacks
     value: ${{ steps.matrix.outputs.matrix != '{"include":[]}' }}
   matrix:
-    description: A matrix suitable for use for GitHub Actions of the affected stacks
+    description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
     value: ${{ steps.matrix.outputs.matrix }}
 
 runs:

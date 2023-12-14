@@ -128,7 +128,7 @@ The config should have the following structure:
   
 ### Migrating from `v1` to `v2`
 
-- In `v2` variables moved from GitHub Action `inputs` to the Atmos GitOps configuration file, which is by default `./.github/config/atmos-gitops.yaml`
+1. `v2` moves most of the `inputs` to the Atmos GitOps config path `./.github/config/atmos-gitops.yaml`. Simply create this file, transfer your settings to it, then remove the corresponding arguments from your invocations of the `cloudposse/github-action-atmos-terraform-apply` action.
 
 |         name             |
 |--------------------------|
@@ -143,8 +143,8 @@ The config should have the following structure:
 | `aws-region`             |
 | `enable-infracost`       |
 
-  
-If you want the same behavior in `v2`  as in`v1` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v1` inputs.
+
+If you want the same behavior in `v2` as in `v1` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v1` inputs.
 
 ```yaml
   - name: Determine Affected Stacks
@@ -154,7 +154,7 @@ If you want the same behavior in `v2`  as in`v1` you should create config `./.gi
       atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
 ```
 
-same behaviour as
+Which would produce the same behavior as in `v1`, doing this:
 
 ```yaml
   - name: Determine Affected Stacks
@@ -203,7 +203,7 @@ same behaviour as
 |------|-------------|
 | affected | The affected stacks |
 | has-affected-stacks | Whether there are affected stacks |
-| matrix | A matrix suitable for use for GitHub Actions of the affected stacks |
+| matrix | The affected stacks as matrix structure suitable for extending matrix size workaround (see README) |
 <!-- markdownlint-restore -->
 
 

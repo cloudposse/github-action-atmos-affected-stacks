@@ -23,5 +23,5 @@
 |------|-------------|
 | affected | The affected stacks |
 | has-affected-stacks | Whether there are affected stacks |
-| matrix | A matrix suitable for use for GitHub Actions of the affected stacks |
+| matrix | The affected stacks as matrix structure suitable for extending matrix size workaround (see README) |
 <!-- markdownlint-restore -->
