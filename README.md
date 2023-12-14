@@ -120,7 +120,7 @@ The config should have the following structure:
         cancel-in-progress: false
       steps:
         - name: Plan Atmos Component
-          uses: cloudposse/github-action-atmos-terraform-plan@incapsulate-configs
+          uses: cloudposse/github-action-atmos-terraform-plan@v1
           with:
             component: ${{ matrix.component }}
             stack: ${{ matrix.stack }}
@@ -128,7 +128,7 @@ The config should have the following structure:
   
 ### Migrating from `v1` to `v2`
 
-`v2` moved variables from `inputs` to atmos gitops config path `./.github/config/atmos-gitops.yaml`
+- In `v2` variables moved from GitHub Action `inputs` to the Atmos GitOps configuration file, which is by default `./.github/config/atmos-gitops.yaml`
 
 |         name             |
 |--------------------------|
@@ -194,7 +194,7 @@ same behaviour as
 | install-terraform | Whether to install terraform | true | false |
 | jq-force | Whether to force the installation of jq | true | false |
 | jq-version | The version of jq to install if install-jq is true | 1.6 | false |
-| nested-matrices-count | Matrices nested levels count (from 1 to 3) | 2 | false |
+| nested-matrices-count | Number of nested matrices that should be returned as the output (from 1 to 3) | 2 | false |
 
 
 ## Outputs
