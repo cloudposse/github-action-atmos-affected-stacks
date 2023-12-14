@@ -111,7 +111,7 @@ usage: |-
     
   ### Migrating from `v1` to `v2`
   
-  `v2` moved variables from `inputs` to atmos gitops config path `./.github/config/atmos-gitops.yaml`
+  - In `v2` variables moved from GitHub Action `inputs` to the Atmos GitOps configuration file, which is by default `./.github/config/atmos-gitops.yaml`
   
   |         name             |
   |--------------------------|
