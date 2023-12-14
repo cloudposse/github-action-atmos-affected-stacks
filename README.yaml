@@ -103,7 +103,7 @@ usage: |-
           cancel-in-progress: false
         steps:
           - name: Plan Atmos Component
-            uses: cloudposse/github-action-atmos-terraform-plan@incapsulate-configs
+            uses: cloudposse/github-action-atmos-terraform-plan@v1
             with:
               component: ${{ matrix.component }}
               stack: ${{ matrix.stack }}
