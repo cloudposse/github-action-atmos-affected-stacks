@@ -81,8 +81,8 @@ The config should have the following structure:
   group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
 ```
 
-[!IMPORTANT]
->**Please note!** the `terraform-state-*` parameters refer to the S3 Bucket and corresponding meta storage DynamoDB table used to store the Terraform Plan files, and not the "Terraform State". These parameters will be renamed in a subsequent release.  
+> [!IMPORTANT]
+> **Please note!** the `terraform-state-*` parameters refer to the S3 Bucket and corresponding meta storage DynamoDB table used to store the Terraform Plan files, and not the "Terraform State". These parameters will be renamed in a subsequent release.  
 
 ### Workflow example
 
@@ -131,7 +131,7 @@ The config should have the following structure:
   
 ### Migrating from `v1` to `v2`
 
-1. `v2` moves most of the `inputs` to the Atmos GitOps config path `./.github/config/atmos-gitops.yaml`. Simply create this file, transfer your settings to it, then remove the corresponding arguments from your invocations of the `cloudposse/github-action-atmos-affected-stacks` action.
+`v2` moves most of the `inputs` to the Atmos GitOps config path `./.github/config/atmos-gitops.yaml`. Simply create this file, transfer your settings to it, then remove the corresponding arguments from your invocations of the `cloudposse/github-action-atmos-affected-stacks` action.
 
 |         name             |
 |--------------------------|
