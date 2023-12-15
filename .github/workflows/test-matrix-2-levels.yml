@@ -1,10 +1,10 @@
-name: Test atmos-affected-stacks positive
+name: Test atmos-affected-stacks with 2 levels of nested matrices
 on:
-  #  # Uncomment when test added first time to register workflow and comment it back after workflow would be registered
-  #  #
-  #  # Added pull_request to register workflow from the PR.
-  #  # Read more https://stackoverflow.com/questions/63362126/github-actions-how-to-run-a-workflow-created-on-a-non-master-branch-from-the-wo
-  # pull_request: {}
+#  # Uncomment when test added first time to register workflow and comment it back after workflow would be registered
+#  #
+#  # Added pull_request to register workflow from the PR.
+#  # Read more https://stackoverflow.com/questions/63362126/github-actions-how-to-run-a-workflow-created-on-a-non-master-branch-from-the-wo
+#  pull_request: {}
   workflow_dispatch: {}
 
 jobs:
@@ -30,6 +30,7 @@ jobs:
         with:
           install-atmos: false
           atmos-gitops-config-path: "./tests/atmos-gitops.yaml"
+          nested-matrices-count: '2'
 
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
