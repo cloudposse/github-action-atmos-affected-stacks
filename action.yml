@@ -123,7 +123,7 @@ runs:
         fi
         affected=$(jq -c '.' affected-stacks.json)
         if [[ "$affected" == "[]" ]]; then
-          echo '[{"component": "None", "stack": "None", "stack-slug": "None"}]' > affected-stacks.json
+          echo '[{"component": "none", "stack": "none", "stack_slug": "none"}]' > affected-stacks.json
           echo "has-affected-stacks=false" >> $GITHUB_OUTPUT 
         else
           echo "has-affected-stacks=true" >> $GITHUB_OUTPUT 
