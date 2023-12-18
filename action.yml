@@ -54,10 +54,10 @@ outputs:
     value: ${{ steps.affected.outputs.affected }}
   has-affected-stacks:
     description: Whether there are affected stacks
-    value: ${{ steps.matrix.outputs.matrix != '{"include":[]}' }}
+    value: ${{ steps.affected.outputs.has-affected-stacks }}
   matrix:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
-    value: ${{ steps.matrix.outputs.matrix != '{"include":[]}' && steps.matrix.outputs.matrix || '{"include":["foo":"bar"]}' }}
+    value: ${{ steps.matrix.outputs.matrix }}
 
 runs:
   using: "composite"
@@ -122,6 +122,12 @@ runs:
           atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
         fi
         affected=$(jq -c '.' affected-stacks.json)
+        if [[ "$affected" == "[]" ]]; then
+          echo '[{"component": "None", "stack": "None", "stack-slug": "None"]' > affected-stacks.json
+          echo "has-affected-stacks=false" >> $GITHUB_OUTPUT 
+        else
+          echo "has-affected-stacks=true" >> $GITHUB_OUTPUT 
+        fi
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
     - uses: cloudposse/github-action-matrix-extended@v0
