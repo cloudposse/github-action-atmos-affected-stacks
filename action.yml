@@ -57,7 +57,7 @@ outputs:
     value: ${{ steps.matrix.outputs.matrix != '{"include":[]}' }}
   matrix:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
-    value: ${{ steps.matrix.outputs.matrix }}
+    value: ${{ steps.matrix.outputs.matrix != '{"include":[]}' && steps.matrix.outputs.matrix || '{"include":["foo":"bar"]}' }}
 
 runs:
   using: "composite"
