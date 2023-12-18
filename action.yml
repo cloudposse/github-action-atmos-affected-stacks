@@ -54,7 +54,7 @@ outputs:
     value: ${{ steps.affected.outputs.affected }}
   has-affected-stacks:
     description: Whether there are affected stacks
-    value: ${{ steps.affected.outputs.has-affected-stacks }}
+    value: ${{ steps.affected.outputs.has-affected-stacks == 'true' }}
   matrix:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
     value: ${{ steps.matrix.outputs.matrix }}
@@ -124,7 +124,7 @@ runs:
         affected=$(jq -c '.' affected-stacks.json)
         if [[ "$affected" == "[]" ]]; then
           echo '[{"component": "none", "stack": "none", "stack_slug": "none"}]' > affected-stacks.json
-          echo "has-affected-stacks=''" >> $GITHUB_OUTPUT 
+          echo "has-affected-stacks=false" >> $GITHUB_OUTPUT 
         else
           echo "has-affected-stacks=true" >> $GITHUB_OUTPUT 
         fi
