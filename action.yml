@@ -80,7 +80,7 @@ runs:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
 
     - if: ${{ inputs.install-atmos == 'true' }}
-      uses: cloudposse/github-action-setup-atmos@1.1.0
+      uses: cloudposse/github-action-setup-atmos@v1
       with:
         atmos-version: ${{ steps.config.outputs.atmos-version }}
         install-wrapper: false
