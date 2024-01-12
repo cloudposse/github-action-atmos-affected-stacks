@@ -30,6 +30,7 @@ jobs:
 
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
+      has-affected-stacks: "${{ steps.current.outputs.has-affected-stacks }}"
       matrix: "${{ steps.current.outputs.matrix }}"
 
   assert:
@@ -38,16 +39,10 @@ jobs:
     steps:
       - uses: nick-fields/assert-action@v1
         with:
-          expected: '[{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"core-ue2-root","stack_slug":"core-ue2-root-datadog-integration","affected":"component"},{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"core-gbl-audit","stack_slug":"core-gbl-audit-datadog-integration","affected":"component"},{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"core-gbl-auto","stack_slug":"core-gbl-auto-datadog-integration","spacelift_stack":"core-gbl-auto-datadog-integration","affected":"component"},{"component":"infrastructure-cplive-plat","component_type":"terraform","component_path":"components/terraform/spacelift","stack":"core-gbl-auto","stack_slug":"core-gbl-auto-infrastructure-cplive-plat","spacelift_stack":"core-gbl-auto-infrastructure-cplive-plat","affected":"stack.vars"},{"component":"infrastructure-cplive-core","component_type":"terraform","component_path":"components/terraform/spacelift","stack":"core-gbl-auto","stack_slug":"core-gbl-auto-infrastructure-cplive-core","spacelift_stack":"core-gbl-auto-infrastructure-cplive-core","affected":"stack.vars"},{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"plat-gbl-prod","stack_slug":"plat-gbl-prod-datadog-integration","spacelift_stack":"plat-gbl-prod-datadog-integration","affected":"component"}]'
+          expected: '[]'
           actual: "${{ needs.test.outputs.affected }}"
 
       - uses: nick-fields/assert-action@v1
         with:
-          expected: '{"include":['
-          actual: "${{ needs.test.outputs.matrix }}"
-          comparison: contains
-
-      - uses: nick-fields/assert-action@v1
-        with:
-          expected: '{"include":[{"name":"core-audit","items":"{\"include\":[{\"component\":\"datadog-integration\",\"component_type\":\"terraform\",\"component_path\":\"components/terraform/datadog-integration\",\"stack\":\"core-gbl-audit\",\"stack_slug\":\"core-gbl-audit-datadog-integration\",\"affected\":\"component\"}]}"},{"name":"core-auto","items":"{\"include\":[{\"component\":\"datadog-integration\",\"component_type\":\"terraform\",\"component_path\":\"components/terraform/datadog-integration\",\"stack\":\"core-gbl-auto\",\"stack_slug\":\"core-gbl-auto-datadog-integration\",\"spacelift_stack\":\"core-gbl-auto-datadog-integration\",\"affected\":\"component\"},{\"component\":\"infrastructure-cplive-core\",\"component_type\":\"terraform\",\"component_path\":\"components/terraform/spacelift\",\"stack\":\"core-gbl-auto\",\"stack_slug\":\"core-gbl-auto-infrastructure-cplive-core\",\"spacelift_stack\":\"core-gbl-auto-infrastructure-cplive-core\",\"affected\":\"stack.vars\"},{\"component\":\"infrastructure-cplive-plat\",\"component_type\":\"terraform\",\"component_path\":\"components/terraform/spacelift\",\"stack\":\"core-gbl-auto\",\"stack_slug\":\"core-gbl-auto-infrastructure-cplive-plat\",\"spacelift_stack\":\"core-gbl-auto-infrastructure-cplive-plat\",\"affected\":\"stack.vars\"}]}"},{"name":"core-root","items":"{\"include\":[{\"component\":\"datadog-integration\",\"component_type\":\"terraform\",\"component_path\":\"components/terraform/datadog-integration\",\"stack\":\"core-ue2-root\",\"stack_slug\":\"core-ue2-root-datadog-integration\",\"affected\":\"component\"}]}"},{"name":"plat-prod","items":"{\"include\":[{\"component\":\"datadog-integration\",\"component_type\":\"terraform\",\"component_path\":\"components/terraform/datadog-integration\",\"stack\":\"plat-gbl-prod\",\"stack_slug\":\"plat-gbl-prod-datadog-integration\",\"spacelift_stack\":\"plat-gbl-prod-datadog-integration\",\"affected\":\"component\"}]}"}]}'
-          actual: "${{ needs.test.outputs.matrix }}"
+          expected: 'false'
+          actual: "${{ needs.test.outputs.has-affected-stacks }}"
