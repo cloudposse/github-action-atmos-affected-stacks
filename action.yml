@@ -123,6 +123,12 @@ runs:
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
+    - name: No changes summary
+      if: ${{ steps.affected.outputs.affected == '[]' }}
+      shell: bash
+      run: |-
+        cat ${{ github.action_path }}/assets/summary.md >> $GITHUB_STEP_SUMMARY
+
     - uses: cloudposse/github-action-matrix-extended@v0
       id: matrix
       with:
