@@ -74,11 +74,6 @@ runs:
         patterns: |
           - ${{ inputs.atmos-gitops-config-path }}
 
-    - name: Set atmos cli config path vars
-      shell: bash
-      run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
-
     - if: ${{ inputs.install-terraform == 'true' }}
       uses: hashicorp/setup-terraform@v2
       with:
@@ -111,20 +106,11 @@ runs:
       run: git checkout ${{ inputs.base-ref }}
       working-directory: main-branch
 
-    - name: Find atmos cli base path
-      uses: cloudposse/github-action-atmos-get-setting@v1
-      id: base-path
-      with:
-        component: null
-        stack: null
-        settings-path: atmos_cli_config.base_path
-
-    - name: Set atmos cli base path vars
+    - name: Set vars
       shell: bash
       run: |-
-        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
-        ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
-        echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
+        # echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV      
 
     - name: atmos affected stacks
       id: affected
