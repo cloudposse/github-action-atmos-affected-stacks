@@ -54,7 +54,7 @@ outputs:
     value: ${{ steps.affected.outputs.affected }}
   has-affected-stacks:
     description: Whether there are affected stacks
-    value: ${{ steps.matrix.outputs.matrix != '{"include":[]}' }}
+    value: ${{ steps.affected.outputs.affected != '[]' }}
   matrix:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
     value: ${{ steps.matrix.outputs.matrix }}
@@ -110,7 +110,6 @@ runs:
       shell: bash
       run: |-
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
-        echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV      
 
     - name: atmos affected stacks
       id: affected
@@ -123,6 +122,12 @@ runs:
         fi
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
+
+    - name: No changes summary
+      if: ${{ steps.affected.outputs.affected == '[]' }}
+      shell: bash
+      run: |-
+        cat ${{ github.action_path }}/assets/summary.md >> $GITHUB_STEP_SUMMARY
 
     - uses: cloudposse/github-action-matrix-extended@v0
       id: matrix
