@@ -54,7 +54,7 @@ outputs:
     value: ${{ steps.affected.outputs.affected }}
   has-affected-stacks:
     description: Whether there are affected stacks
-    value: ${{ steps.matrix.outputs.matrix != '{"include":[]}' }}
+    value: ${{ steps.affected.outputs.affected == '[]' }}
   matrix:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
     value: ${{ steps.matrix.outputs.matrix }}
