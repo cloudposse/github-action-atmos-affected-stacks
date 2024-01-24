@@ -110,13 +110,13 @@ The config should have the following structure:
 
     atmos-plan:
       needs: ["atmos-affected"]
-      if: ${{ needs.atmos-affected.outputs.has-affected-stacks }}
+      if: ${{ needs.atmos-affected.outputs.has-affected-stacks == 'true' }}
       name: ${{ matrix.stack_slug }}
       runs-on: ['self-hosted']
       strategy:
         max-parallel: 10
         fail-fast: false # Don't fail fast to avoid locking TF State
-        matrix: ${{ fromJson(needs.atmos-affected.outputs.stacks) }}
+        matrix: ${{ fromJson(needs.atmos-affected.outputs.matrix) }}
       ## Avoid running the same stack in parallel mode (from different workflows)
       concurrency:
         group: ${{ matrix.stack_slug }}
@@ -155,6 +155,7 @@ If you want the same behavior in `v2` as in `v1` you should create config `./.gi
     id: affected
     with:
       atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
+      nested-matrices-count: 1
 ```
 
 Which would produce the same behavior as in `v1`, doing this:
