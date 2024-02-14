@@ -80,6 +80,7 @@ runs:
       shell: bash
       id: config
       run: |-
+        atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]'
         echo "group-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]')" >> $GITHUB_OUTPUT
         echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT        
 
