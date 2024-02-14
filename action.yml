@@ -65,6 +65,12 @@ runs:
       with:
         ref: ${{ inputs.head-ref }}
 
+    - if: ${{ inputs.install-jq == 'true' }}
+      uses: dcarbone/install-jq-action@v1.0.1
+      with:
+        version: ${{ inputs.jq-version }}
+        force: ${{ inputs.jq-force }}
+
     - if: ${{ inputs.install-atmos == 'true' }}
       uses: cloudposse/github-action-setup-atmos@v1
       with:
@@ -80,15 +86,8 @@ runs:
       shell: bash
       id: config
       run: |-
-        atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]'
         echo "group-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]')" >> $GITHUB_OUTPUT
         echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT        
-
-    - if: ${{ inputs.install-jq == 'true' }}
-      uses: dcarbone/install-jq-action@v1.0.1
-      with:
-        version: ${{ inputs.jq-version }}
-        force: ${{ inputs.jq-force }}
 
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
