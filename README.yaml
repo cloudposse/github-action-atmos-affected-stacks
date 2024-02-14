@@ -135,18 +135,18 @@ usage: |-
   
   The following configuration fields are now moved to `atmos.yaml` 
   
-  |         name             |    path in `atmos.yaml`                        |
-  |--------------------------|------------------------------------------------|
-  | `aws-region`             | `integration.github.gitops.storage.region`     | 
-  | `terraform-state-bucket` | `integration.github.gitops.storage.bucket`     |
-  | `terraform-state-table`  | `integration.github.gitops.storage.table`      |
-  | `terraform-state-role`   | `integration.github.gitops.storage.role`       |
-  | `terraform-plan-role`    | `integration.github.gitops.role.plan`          |
-  | `terraform-apply-role`   | `integration.github.gitops.role.apply`         |
-  | `terraform-version`      | `integration.github.gitops.terraform-version`  |
-  | `enable-infracost`       |  `integration.github.gitops.infracost-enabled` |
-  | `sort-by`                |  `integration.github.gitops.matrix.sort-by`    |
-  | `group-by`               |  `integration.github.gitops.matrix.group-by`   |
+  |         name             |    path in `atmos.yaml`                         |
+  |--------------------------|-------------------------------------------------|
+  | `aws-region`             | `integrations.github.gitops.storage.region`     | 
+  | `terraform-state-bucket` | `integrations.github.gitops.storage.bucket`     |
+  | `terraform-state-table`  | `integrations.github.gitops.storage.table`      |
+  | `terraform-state-role`   | `integrations.github.gitops.storage.role`       |
+  | `terraform-plan-role`    | `integrations.github.gitops.role.plan`          |
+  | `terraform-apply-role`   | `integrations.github.gitops.role.apply`         |
+  | `terraform-version`      | `integrations.github.gitops.terraform-version`  |
+  | `enable-infracost`       | `integrations.github.gitops.infracost-enabled`  |
+  | `sort-by`                | `integrations.github.gitops.matrix.sort-by`     |
+  | `group-by`               | `integrations.github.gitops.matrix.group-by`    |
   
   
   If you want `v3` having the same behaviour as `v2` you should  have 
