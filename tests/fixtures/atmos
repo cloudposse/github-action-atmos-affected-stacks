@@ -10,7 +10,7 @@ cat << EOF
       },
       "github": {
          "gitops": {
-						"infracost_enabled": false,
+						"infracost-enabled": false,
 						"matrix": {
 							"group-by": ".stack_slug | split(\"-\") | [.[0], .[2]] | join(\"-\")",
 							"sort-by": ".stack_slug"

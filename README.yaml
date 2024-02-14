@@ -36,7 +36,7 @@ description: A GitHub Action to get a list of affected atmos stacks for a pull r
 
 introduction: |-
   This is a GitHub Action to get a list of affected atmos stacks for a pull request. It optionally installs 
-  `atmos`, `terraform` and `jq` and runs `atmos describe affected` to get the list of affected stacks. It provides the 
+  `atmos` and `jq` and runs `atmos describe affected` to get the list of affected stacks. It provides the 
   raw list of affected stacks as an output as well as a matrix that can be used further in GitHub action jobs.
 
 references: []
@@ -46,26 +46,27 @@ usage: |-
   
   ### Config
 
-  The action expects the atmos gitops configuration file to be present in the repository in `./.github/config/atmos-gitops.yaml`.
+  The action expects the atmos configuration file `atmos.yaml` to be present in the repository and contains.
   The config should have the following structure:
   
   ```yaml
-    atmos-version: 1.45.3
-    atmos-config-path: ./rootfs/usr/local/etc/atmos/
-    terraform-state-bucket: cptest-core-ue2-auto-gitops
-    terraform-state-table: cptest-core-ue2-auto-gitops
-    terraform-state-role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
-    terraform-plan-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
-    terraform-apply-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
-    terraform-version: 1.5.2
-    aws-region: us-east-2
-    enable-infracost: false
-    sort-by: .stack_slug
-    group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
+  integrations:
+    github:
+      gitops:
+        terraform-version: 1.5.2
+        infracost-enabled: false
+        storage:
+          region: us-east-2
+          bucket: cptest-core-ue2-auto-gitops
+          table: cptest-core-ue2-auto-gitops-plan-storage
+          role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+        role:
+          plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+          apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+        matrix:
+          sort-by: .stack_slug
+          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
   ```
-  
-  > [!IMPORTANT]
-  > **Please note!** the `terraform-state-*` parameters refer to the S3 Bucket and corresponding meta storage DynamoDB table used to store the Terraform Plan files, and not the "Terraform State". These parameters will be renamed in a subsequent release.  
   
   ### Workflow example
   
@@ -84,7 +85,8 @@ usage: |-
           - id: affected
             uses: cloudposse/github-action-atmos-affected-stacks@v2
             with:
-              atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
+              atmos-config-path: ./atmos.yaml
+              atmos-version: 1.63.0
               nested-matrices-count: 1
 
         outputs:
@@ -111,6 +113,100 @@ usage: |-
               component: ${{ matrix.component }}
               stack: ${{ matrix.stack }}
   ```
+    
+  ### Migrating from `v2` to `v3`
+  
+  `v3` works only with `atmos >= 1.63.0`
+  
+  `v3` drops `install-terraform` input because terraform is not required for affected stacks call
+  
+  `v3` drop `atmos-gitops-config-path` input and  `./.github/config/atmos-gitops.yaml`  config. Now you have to use GitHub actions inputs and `atmos.yaml` to specify that configuration.
+  
+  The following configuration fields now moved to GitHub action inputs with the same names
+  
+  |         name            |
+  |-------------------------|
+  | `atmos-version`         |
+  | `atmos-config-path`     |
+  
+  
+  The following configuration fields are now moved to `atmos.yaml` 
+  
+  |         name             |    path in `atmos.yaml`                        |
+  |--------------------------|------------------------------------------------|
+  | `aws-region`             | `integration.github.gitops.storage.region`     | 
+  | `terraform-state-bucket` | `integration.github.gitops.storage.bucket`     |
+  | `terraform-state-table`  | `integration.github.gitops.storage.table`      |
+  | `terraform-state-role`   | `integration.github.gitops.storage.role`       |
+  | `terraform-plan-role`    | `integration.github.gitops.role.plan`          |
+  | `terraform-apply-role`   | `integration.github.gitops.role.apply`         |
+  | `terraform-version`      | `integration.github.gitops.terraform-version`  |
+  | `enable-infracost`       |  `integration.github.gitops.infracost-enabled` |
+  | `sort-by`                |  `integration.github.gitops.matrix.sort-by`    |
+  | `group-by`               |  `integration.github.gitops.matrix.group-by`   |
+  
+  
+  If you want `v3` having the same behaviour as `v2` you should  have 
+  
+  `atmos.yaml`
+  ```yaml
+  ...
+  
+  integrations:
+    github:
+      gitops:
+        terraform-version: 1.5.2
+        infracost-enabled: false
+        storage:
+          region: us-east-2
+          bucket: cptest-core-ue2-auto-gitops
+          table: cptest-core-ue2-auto-gitops-plan-storage
+          role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+        role:
+          plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+          apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+        matrix:
+          sort-by: .stack_slug
+          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+  
+  ...
+  ```
+  
+  `.github/workflows/main.yaml`
+  ```yaml
+    - id: affected
+      uses: cloudposse/github-action-atmos-affected-stacks@v2
+      with:
+        atmos-config-path: ./atmos.yaml
+        atmos-version: 1.63.0
+  ``` 
+  
+  same behaviour as
+  
+  `./.github/config/atmos-gitops.yaml`
+  ```yaml
+  atmos-version: 1.45.3
+  atmos-config-path: ./rootfs/usr/local/etc/atmos/
+  terraform-state-bucket: cptest-core-ue2-auto-gitops
+  terraform-state-table: cptest-core-ue2-auto-gitops
+  terraform-state-role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+  terraform-plan-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+  terraform-apply-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+  terraform-version: 1.5.2
+  aws-region: us-east-2
+  enable-infracost: false
+  sort-by: .stack_slug
+  group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
+  ```
+  
+  `.github/workflows/main.yaml`
+  ```yaml
+    - id: affected
+      uses: cloudposse/github-action-atmos-affected-stacks@v2
+      with:
+        atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
+  ```
+   
     
   ### Migrating from `v1` to `v2`
   

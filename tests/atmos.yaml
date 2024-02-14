@@ -250,7 +250,7 @@ integrations:
   github:
     gitops:
       terraform-version: 1.5.2
-      infracost_enabled: false
+      infracost-enabled: false
       storage:
         region: us-east-2
         bucket: cptest-core-ue2-auto-gitops

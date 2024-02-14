@@ -23,7 +23,7 @@ inputs:
   atmos-version:
     description: The version of atmos to install
     required: false
-    default: "latest"
+    default: ">= 1.63.0"
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
