@@ -183,7 +183,7 @@ integrations:
 `.github/workflows/main.yaml`
 ```yaml
   - id: affected
-    uses: cloudposse/github-action-atmos-affected-stacks@v2
+    uses: cloudposse/github-action-atmos-affected-stacks@v3
     with:
       atmos-config-path: ./atmos.yaml
       atmos-version: 1.63.0
