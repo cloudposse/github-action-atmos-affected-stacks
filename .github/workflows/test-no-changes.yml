@@ -26,7 +26,7 @@ jobs:
         id: current
         with:
           install-atmos: true
-          atmos-gitops-config-path: "./tests/atmos-gitops.yaml"
+          atmos-config-path: "./rootfs/usr/local/etc/atmos/"
 
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
