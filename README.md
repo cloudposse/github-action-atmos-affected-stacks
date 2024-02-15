@@ -96,7 +96,7 @@ integrations:
         - id: affected
           uses: cloudposse/github-action-atmos-affected-stacks@v3
           with:
-            atmos-config-path: ./atmos.yaml
+            atmos-config-path: ./
             atmos-version: 1.63.0
             nested-matrices-count: 1
 
@@ -188,7 +188,7 @@ integrations:
   - id: affected
     uses: cloudposse/github-action-atmos-affected-stacks@v3
     with:
-      atmos-config-path: ./atmos.yaml
+      atmos-config-path: ./
       atmos-version: 1.63.0
 ``` 
 
