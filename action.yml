@@ -62,7 +62,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.head-ref }}
 
@@ -75,7 +75,7 @@ runs:
           - ${{ inputs.atmos-gitops-config-path }}
 
     - if: ${{ inputs.install-terraform == 'true' }}
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
 
@@ -86,7 +86,7 @@ runs:
         install-wrapper: false
 
     - if: ${{ inputs.install-jq == 'true' }}
-      uses: dcarbone/install-jq-action@v1.0.1
+      uses: dcarbone/install-jq-action@v2.1.0
       with:
         version: ${{ inputs.jq-version }}
         force: ${{ inputs.jq-force }}
@@ -94,7 +94,7 @@ runs:
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
     # look at the contents of the stack files to determine if any have changed.
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.default-branch }}
         path: main-branch
