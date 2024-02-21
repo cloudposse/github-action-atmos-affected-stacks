@@ -96,7 +96,7 @@ integrations:
         - id: affected
           uses: cloudposse/github-action-atmos-affected-stacks@v3
           with:
-            atmos-config-path: ./
+            atmos-config-path: ./rootfs/usr/local/etc/atmos/
             atmos-version: 1.63.0
             nested-matrices-count: 1
 
@@ -159,7 +159,7 @@ The following configuration fields are now moved to `atmos.yaml`
 
 If you want `v3` having the same behaviour as `v2` you should  have 
 
-`atmos.yaml`
+`./.github/config/atmos-gitops.yaml`
 ```yaml
 ...
 
@@ -188,7 +188,7 @@ integrations:
   - id: affected
     uses: cloudposse/github-action-atmos-affected-stacks@v3
     with:
-      atmos-config-path: ./
+      atmos-config-path: ./rootfs/usr/local/etc/atmos/
       atmos-version: 1.63.0
 ``` 
 
