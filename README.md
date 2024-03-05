@@ -127,11 +127,11 @@ integrations:
   
 ### Migrating from `v2` to `v3`
 
-`v3` works only with `atmos >= 1.63.0`
+The notable changes in `v3` are:
 
-`v3` drops `install-terraform` input because terraform is not required for affected stacks call
-
-`v3` drop `atmos-gitops-config-path` input and  `./.github/config/atmos-gitops.yaml`  config. Now you have to use GitHub actions inputs and `atmos.yaml` to specify that configuration.
+- `v3` works only with `atmos >= 1.63.0`
+- `v3` drops `install-terraform` input because terraform is not required for affected stacks call
+- `v3` drops `atmos-gitops-config-path` input and the `./.github/config/atmos-gitops.yaml` config file. Now you have to use GitHub Actions environment variables to specify the location of the `atmos.yaml`.
 
 The following configuration fields now moved to GitHub action inputs with the same names
 
@@ -141,9 +141,9 @@ The following configuration fields now moved to GitHub action inputs with the sa
 | `atmos-config-path`     |
 
 
-The following configuration fields are now moved to `atmos.yaml` 
+The following configuration fields moved to the `atmos.yaml` configuration file.
 
-|         name             |    path in `atmos.yaml`                         |
+|         name             |    YAML path in `atmos.yaml`                    |
 |--------------------------|-------------------------------------------------|
 | `aws-region`             | `integrations.github.gitops.storage.region`     | 
 | `terraform-state-bucket` | `integrations.github.gitops.storage.bucket`     |
@@ -157,11 +157,11 @@ The following configuration fields are now moved to `atmos.yaml`
 | `group-by`               | `integrations.github.gitops.matrix.group-by`    |
 
 
-If you want `v3` having the same behaviour as `v2` you should  have 
+For example, to migrate from `v2` to `v3`, you should have something similar to the following in your `atmos.yaml`: 
 
-`./.github/config/atmos-gitops.yaml`
+`./.github/config/atmos.yaml`
 ```yaml
-...
+# ... your existing configuration
 
 integrations:
   github:
@@ -179,8 +179,6 @@ integrations:
       matrix:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
-
-...
 ```
 
 `.github/workflows/main.yaml`
@@ -192,9 +190,9 @@ integrations:
       atmos-version: 1.63.0
 ``` 
 
-same behaviour as
+This corresponds to the `v2` configuration (deprecated) below.
 
-`./.github/config/atmos-gitops.yaml`
+The `v2` configuration file `./.github/config/atmos-gitops.yaml` looked like this:
 ```yaml
 atmos-version: 1.45.3
 atmos-config-path: ./rootfs/usr/local/etc/atmos/
@@ -209,6 +207,8 @@ enable-infracost: false
 sort-by: .stack_slug
 group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
 ```
+
+And the `v2` GitHub Action Workflow looked like this.
 
 `.github/workflows/main.yaml`
 ```yaml
