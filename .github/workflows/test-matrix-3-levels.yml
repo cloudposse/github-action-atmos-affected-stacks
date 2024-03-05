@@ -20,7 +20,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: add mock atmos to the path
         run: echo "./tests/fixtures" >> $GITHUB_PATH
@@ -40,18 +40,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           expected: '[{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"core-ue2-root","stack_slug":"core-ue2-root-datadog-integration","affected":"component"},{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"core-gbl-audit","stack_slug":"core-gbl-audit-datadog-integration","affected":"component"},{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"core-gbl-auto","stack_slug":"core-gbl-auto-datadog-integration","spacelift_stack":"core-gbl-auto-datadog-integration","affected":"component"},{"component":"infrastructure-cplive-plat","component_type":"terraform","component_path":"components/terraform/spacelift","stack":"core-gbl-auto","stack_slug":"core-gbl-auto-infrastructure-cplive-plat","spacelift_stack":"core-gbl-auto-infrastructure-cplive-plat","affected":"stack.vars"},{"component":"infrastructure-cplive-core","component_type":"terraform","component_path":"components/terraform/spacelift","stack":"core-gbl-auto","stack_slug":"core-gbl-auto-infrastructure-cplive-core","spacelift_stack":"core-gbl-auto-infrastructure-cplive-core","affected":"stack.vars"},{"component":"datadog-integration","component_type":"terraform","component_path":"components/terraform/datadog-integration","stack":"plat-gbl-prod","stack_slug":"plat-gbl-prod-datadog-integration","spacelift_stack":"plat-gbl-prod-datadog-integration","affected":"component"}]'
           actual: "${{ needs.test.outputs.affected }}"
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           expected: '{"include":['
           actual: "${{ needs.test.outputs.matrix }}"
           comparison: contains
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           expected: '{"include":[{"name":"core-audit","items":"{\"include\":[{\"name\":\"core-gbl-audit-datadog-integration - core-gbl-audit-datadog-integration\",\"items\":\"{\\\"include\\\":[{\\\"component\\\":\\\"datadog-integration\\\",\\\"component_type\\\":\\\"terraform\\\",\\\"component_path\\\":\\\"components/terraform/datadog-integration\\\",\\\"stack\\\":\\\"core-gbl-audit\\\",\\\"stack_slug\\\":\\\"core-gbl-audit-datadog-integration\\\",\\\"affected\\\":\\\"component\\\"}]}\"}]}"},{"name":"core-auto","items":"{\"include\":[{\"name\":\"core-gbl-auto-datadog-integration - core-gbl-auto-infrastructure-cplive-plat\",\"items\":\"{\\\"include\\\":[{\\\"component\\\":\\\"datadog-integration\\\",\\\"component_type\\\":\\\"terraform\\\",\\\"component_path\\\":\\\"components/terraform/datadog-integration\\\",\\\"stack\\\":\\\"core-gbl-auto\\\",\\\"stack_slug\\\":\\\"core-gbl-auto-datadog-integration\\\",\\\"spacelift_stack\\\":\\\"core-gbl-auto-datadog-integration\\\",\\\"affected\\\":\\\"component\\\"},{\\\"component\\\":\\\"infrastructure-cplive-core\\\",\\\"component_type\\\":\\\"terraform\\\",\\\"component_path\\\":\\\"components/terraform/spacelift\\\",\\\"stack\\\":\\\"core-gbl-auto\\\",\\\"stack_slug\\\":\\\"core-gbl-auto-infrastructure-cplive-core\\\",\\\"spacelift_stack\\\":\\\"core-gbl-auto-infrastructure-cplive-core\\\",\\\"affected\\\":\\\"stack.vars\\\"},{\\\"component\\\":\\\"infrastructure-cplive-plat\\\",\\\"component_type\\\":\\\"terraform\\\",\\\"component_path\\\":\\\"components/terraform/spacelift\\\",\\\"stack\\\":\\\"core-gbl-auto\\\",\\\"stack_slug\\\":\\\"core-gbl-auto-infrastructure-cplive-plat\\\",\\\"spacelift_stack\\\":\\\"core-gbl-auto-infrastructure-cplive-plat\\\",\\\"affected\\\":\\\"stack.vars\\\"}]}\"}]}"},{"name":"core-root","items":"{\"include\":[{\"name\":\"core-ue2-root-datadog-integration - core-ue2-root-datadog-integration\",\"items\":\"{\\\"include\\\":[{\\\"component\\\":\\\"datadog-integration\\\",\\\"component_type\\\":\\\"terraform\\\",\\\"component_path\\\":\\\"components/terraform/datadog-integration\\\",\\\"stack\\\":\\\"core-ue2-root\\\",\\\"stack_slug\\\":\\\"core-ue2-root-datadog-integration\\\",\\\"affected\\\":\\\"component\\\"}]}\"}]}"},{"name":"plat-prod","items":"{\"include\":[{\"name\":\"plat-gbl-prod-datadog-integration - plat-gbl-prod-datadog-integration\",\"items\":\"{\\\"include\\\":[{\\\"component\\\":\\\"datadog-integration\\\",\\\"component_type\\\":\\\"terraform\\\",\\\"component_path\\\":\\\"components/terraform/datadog-integration\\\",\\\"stack\\\":\\\"plat-gbl-prod\\\",\\\"stack_slug\\\":\\\"plat-gbl-prod-datadog-integration\\\",\\\"spacelift_stack\\\":\\\"plat-gbl-prod-datadog-integration\\\",\\\"affected\\\":\\\"component\\\"}]}\"}]}"}]}'
           actual: "${{ needs.test.outputs.matrix }}"
