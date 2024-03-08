@@ -54,7 +54,7 @@ raw list of affected stacks as an output as well as a matrix that can be used fu
 
 ### Config
 
-The action expects the atmos configuration file `atmos.yaml` to be present in the repository and contains.
+The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
 The config should have the following structure:
 
 ```yaml
