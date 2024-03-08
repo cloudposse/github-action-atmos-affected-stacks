@@ -72,7 +72,7 @@ runs:
         force: ${{ inputs.jq-force }}
 
     - if: ${{ inputs.install-atmos == 'true' }}
-      uses: cloudposse/github-action-setup-atmos@v1
+      uses: cloudposse/github-action-setup-atmos@v2
       with:
         atmos-version: ${{ inputs.atmos-version }}
         install-wrapper: false
