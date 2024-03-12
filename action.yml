@@ -20,18 +20,17 @@ inputs:
     description: Whether to install atmos
     required: false
     default: "true"
-  atmos-gitops-config-path:
-    description: The path to the atmos-gitops.yaml file
+  atmos-version:
+    description: The version of atmos to install
     required: false
-    default: ./.github/config/atmos-gitops.yaml
+    default: ">= 1.63.0"
+  atmos-config-path:
+    description: The path to the atmos.yaml file
+    required: true
   atmos-include-spacelift-admin-stacks:
     description: Whether to include the Spacelift admin stacks of affected stacks in the output
     required: false
     default: "false"
-  install-terraform:
-    description: Whether to install terraform
-    required: false
-    default: "true"
   install-jq:
     description: Whether to install jq
     required: false
@@ -66,30 +65,29 @@ runs:
       with:
         ref: ${{ inputs.head-ref }}
 
-    - name: config
-      uses: cloudposse/github-action-config-levels@nodejs20
-      id: config
-      with:
-        output_properties: true
-        patterns: |
-          - ${{ inputs.atmos-gitops-config-path }}
-
-    - if: ${{ inputs.install-terraform == 'true' }}
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: ${{ steps.config.outputs.terraform-version }}
-
-    - if: ${{ inputs.install-atmos == 'true' }}
-      uses: cloudposse/github-action-setup-atmos@v2
-      with:
-        atmos-version: ${{ steps.config.outputs.atmos-version }}
-        install-wrapper: false
-
     - if: ${{ inputs.install-jq == 'true' }}
       uses: dcarbone/install-jq-action@v2.1.0
       with:
         version: ${{ inputs.jq-version }}
         force: ${{ inputs.jq-force }}
+
+    - if: ${{ inputs.install-atmos == 'true' }}
+      uses: cloudposse/github-action-setup-atmos@v2
+      with:
+        atmos-version: ${{ inputs.atmos-version }}
+        install-wrapper: false
+
+    - name: Set vars
+      shell: bash
+      run: |-
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV 
+
+    - name: config
+      shell: bash
+      id: config
+      run: |-
+        echo "group-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]')" >> $GITHUB_OUTPUT
+        echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT        
 
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
@@ -105,11 +103,6 @@ runs:
       shell: bash
       run: git checkout ${{ inputs.base-ref }}
       working-directory: main-branch
-
-    - name: Set vars
-      shell: bash
-      run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: atmos affected stacks
       id: affected
