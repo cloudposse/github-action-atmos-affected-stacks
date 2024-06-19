@@ -1,8 +1,9 @@
 
 
 <!-- markdownlint-disable -->
-# github-action-atmos-affected <a href="https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-atmos-affected-stacks&utm_content="><img align="right" src="https://cloudposse.com/logo-300x69.svg" width="150" /></a>
-<a href="https://github.com/cloudposse/github-action-atmos-affected-stacks/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-atmos-affected-stacks.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a>
+<a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse/github-action-atmos-affected-stacks/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
+    <p align="right">
+<a href="https://github.com/cloudposse/github-action-atmos-affected-stacks/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-atmos-affected-stacks.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a></p>
 <!-- markdownlint-restore -->
 
 <!--
