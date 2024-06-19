@@ -31,6 +31,10 @@ inputs:
     description: Whether to include the Spacelift admin stacks of affected stacks in the output
     required: false
     default: "false"
+  atmos-include-dependents:
+    description: Whether to include dependents of affected stacks in the output
+    required: false
+    default: "false"
   install-jq:
     description: Whether to install jq
     required: false
@@ -110,6 +114,8 @@ runs:
       run: |
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
           atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-spacelift-admin-stacks=true
+        elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-dependents=true
         else
           atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
         fi
