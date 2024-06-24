@@ -117,7 +117,7 @@ runs:
       working-directory: base-ref
 
     - name: atmos affected stacks for atmos pro
-      id: affected
+      id: affected-pro
       if: ${{ inputs.atmos-pro-upload == 'true' }}
       shell: bash
       run: |
@@ -125,6 +125,7 @@ runs:
 
     - name: atmos affected stacks
       id: affected
+      if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
@@ -138,13 +139,14 @@ runs:
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
     - name: No changes summary
-      if: ${{ steps.affected.outputs.affected == '[]' }}
+      if: ${{ inputs.atmos-pro-upload == 'false' && steps.affected.outputs.affected == '[]' }}
       shell: bash
       run: |-
         cat ${{ github.action_path }}/assets/summary.md >> $GITHUB_STEP_SUMMARY
 
     - uses: cloudposse/github-action-matrix-extended@v0
       id: matrix
+      if: ${{ inputs.atmos-pro-upload == 'false' }}
       with:
         matrix: affected-stacks.json
         sort-by: ${{ steps.config.outputs.sort-by }}
