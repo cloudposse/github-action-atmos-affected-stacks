@@ -27,6 +27,14 @@ inputs:
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
+  atmos-pro-upload:
+    description: Whether to upload affected stacks directly to Atmos Pro
+    required: false
+    default: "false"
+  atmos-pro-base-url:
+    description: The base URL of Atmos Pro
+    required: false
+    default: "https://app.cloudposse.com"
   atmos-include-spacelift-admin-stacks:
     description: Whether to include the Spacelift admin stacks of affected stacks in the output
     required: false
@@ -49,7 +57,7 @@ inputs:
     default: "true"
   nested-matrices-count:
     required: false
-    description: 'Number of nested matrices that should be returned as the output (from 1 to 3)'
+    description: "Number of nested matrices that should be returned as the output (from 1 to 3)"
     default: "2"
 outputs:
   affected:
@@ -84,14 +92,14 @@ runs:
     - name: Set vars
       shell: bash
       run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV 
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: config
       shell: bash
       id: config
       run: |-
         echo "group-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]')" >> $GITHUB_OUTPUT
-        echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT        
+        echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT
 
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
@@ -99,25 +107,32 @@ runs:
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.default-branch }}
-        path: main-branch
+        path: base-ref
         fetch-depth: 0
 
-    - name: checkout head ref
+    - name: checkout base ref
       id: base-ref
       shell: bash
       run: git checkout ${{ inputs.base-ref }}
-      working-directory: main-branch
+      working-directory: base-ref
+
+    - name: atmos affected stacks for atmos pro
+      id: affected
+      if: ${{ inputs.atmos-pro-upload == 'true' }}
+      shell: bash
+      run: |
+        atmos describe affected --upload --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
 
     - name: atmos affected stacks
       id: affected
       shell: bash
       run: |
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-spacelift-admin-stacks=true
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-spacelift-admin-stacks=true
         elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-dependents=true
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true
         else
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
         fi
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
