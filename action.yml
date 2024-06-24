@@ -119,6 +119,8 @@ runs:
     - name: atmos affected stacks for atmos pro
       id: affected-pro
       if: ${{ inputs.atmos-pro-upload == 'true' }}
+      env:
+        ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}
       shell: bash
       run: |
         atmos describe affected --upload --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
