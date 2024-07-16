@@ -35,6 +35,10 @@ inputs:
     description: The base URL of Atmos Pro
     required: false
     default: "https://app.cloudposse.com"
+  atmos-pro-token:
+    description: The API token to allow Atmos Pro to upload affected stacks
+    required: false
+    default: ""
   atmos-include-spacelift-admin-stacks:
     description: Whether to include the Spacelift admin stacks of affected stacks in the output
     required: false
@@ -121,6 +125,7 @@ runs:
       if: ${{ inputs.atmos-pro-upload == 'true' }}
       env:
         ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}
+        ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
       shell: bash
       run: |
         atmos describe affected --upload --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
