@@ -104,47 +104,49 @@ integrations:
 ### Workflow example
 
 ```yaml
-  name: Pull Request
-  on:
-    pull_request:
-      branches: [ 'main' ]
-      types: [opened, synchronize, reopened, closed, labeled, unlabeled]
+name: Pull Request
+on:
+  pull_request:
+    branches: [ 'main' ]
+    types: [opened, synchronize, reopened, closed, labeled, unlabeled]
 
-  jobs:
-    context:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-        - id: affected
-          uses: cloudposse/github-action-atmos-affected-stacks@v3
-          with:
-            atmos-config-path: ./rootfs/usr/local/etc/atmos/
-            atmos-version: 1.63.0
-            nested-matrices-count: 1
+jobs:
+  atmos-affected:
+    runs-on: ubuntu-latest
+    steps:
+      - id: affected
+        uses: cloudposse/github-action-atmos-affected-stacks@v3
+        with:
+          atmos-config-path: ./rootfs/usr/local/etc/atmos/
+          atmos-version: 1.63.0
+          nested-matrices-count: 1
 
-      outputs:
-        affected: ${{ steps.affected.outputs.affected }}
-        matrix: ${{ steps.affected.outputs.matrix }}
+    outputs:
+      matrix: ${{ steps.affected.outputs.matrix }}
+      has-affected-stacks: ${{ steps.affected.outputs.has-affected-stacks }}
 
-    atmos-plan:
-      needs: ["atmos-affected"]
-      if: ${{ needs.atmos-affected.outputs.has-affected-stacks == 'true' }}
-      name: ${{ matrix.stack_slug }}
-      runs-on: ['self-hosted']
-      strategy:
-        max-parallel: 10
-        fail-fast: false # Don't fail fast to avoid locking TF State
-        matrix: ${{ fromJson(needs.atmos-affected.outputs.matrix) }}
-      ## Avoid running the same stack in parallel mode (from different workflows)
-      concurrency:
-        group: ${{ matrix.stack_slug }}
-        cancel-in-progress: false
-      steps:
-        - name: Plan Atmos Component
-          uses: cloudposse/github-action-atmos-terraform-plan@v1
-          with:
-            component: ${{ matrix.component }}
-            stack: ${{ matrix.stack }}
+  # This job is an example how to use the affected stacks with the matrix strategy
+  atmos-plan:
+    needs: ["atmos-affected"]
+    if: ${{ needs.atmos-affected.outputs.has-affected-stacks == 'true' }}
+    name: Plan ${{ matrix.stack_slug }}
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 10
+      fail-fast: false # Don't fail fast to avoid locking TF State
+      matrix: ${{ fromJson(needs.atmos-affected.outputs.matrix) }}
+    ## Avoid running the same stack in parallel mode (from different workflows)
+    concurrency:
+      group: ${{ matrix.stack_slug }}
+      cancel-in-progress: false
+    steps:
+      - name: Plan Atmos Component
+        uses: cloudposse/github-action-atmos-terraform-plan@v2
+        with:
+          component: ${{ matrix.component }}
+          stack: ${{ matrix.stack }}
+          atmos-config-path: ./rootfs/usr/local/etc/atmos/
+          atmos-version: 1.63.0
 ```
   
 ### Migrating from `v2` to `v3`
