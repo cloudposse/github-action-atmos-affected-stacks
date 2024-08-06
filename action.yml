@@ -27,6 +27,18 @@ inputs:
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
+  atmos-pro-upload:
+    description: Whether to upload affected stacks directly to Atmos Pro
+    required: false
+    default: "false"
+  atmos-pro-base-url:
+    description: The base URL of Atmos Pro
+    required: false
+    default: "https://app.cloudposse.com"
+  atmos-pro-token:
+    description: The API token to allow Atmos Pro to upload affected stacks
+    required: false
+    default: ""
   atmos-include-spacelift-admin-stacks:
     description: Whether to include the Spacelift admin stacks of affected stacks in the output
     required: false
@@ -49,7 +61,7 @@ inputs:
     default: "true"
   nested-matrices-count:
     required: false
-    description: 'Number of nested matrices that should be returned as the output (from 1 to 3)'
+    description: "Number of nested matrices that should be returned as the output (from 1 to 3)"
     default: "2"
 outputs:
   affected:
@@ -84,7 +96,7 @@ runs:
     - name: Set vars
       shell: bash
       run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV 
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: config
       shell: bash
@@ -93,7 +105,7 @@ runs:
         echo "opentofu-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["opentofu-version"]')" >> $GITHUB_OUTPUT        
         echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT      
         echo "group-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]')" >> $GITHUB_OUTPUT
-        echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT        
+        echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT
 
     - name: Install Terraform
       if: ${{ steps.config.outputs.terraform-version != '' && steps.config.outputs.terraform-version != 'null' }}
@@ -120,37 +132,49 @@ runs:
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.default-branch }}
-        path: main-branch
+        path: base-ref
         fetch-depth: 0
 
-    - name: checkout head ref
+    - name: checkout base ref
       id: base-ref
       shell: bash
       run: git checkout ${{ inputs.base-ref }}
-      working-directory: main-branch
+      working-directory: base-ref
+
+    - name: atmos affected stacks for atmos pro
+      id: affected-pro
+      if: ${{ inputs.atmos-pro-upload == 'true' }}
+      env:
+        ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}
+        ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
+      shell: bash
+      run: |
+        atmos describe affected --upload --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
 
     - name: atmos affected stacks
       id: affected
+      if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-spacelift-admin-stacks=true
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-spacelift-admin-stacks=true
         elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-dependents=true
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true
         else
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
+          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
         fi
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
     - name: No changes summary
-      if: ${{ steps.affected.outputs.affected == '[]' }}
+      if: ${{ inputs.atmos-pro-upload == 'false' && steps.affected.outputs.affected == '[]' }}
       shell: bash
       run: |-
         cat ${{ github.action_path }}/assets/summary.md >> $GITHUB_STEP_SUMMARY
 
     - uses: cloudposse/github-action-matrix-extended@v0
       id: matrix
+      if: ${{ inputs.atmos-pro-upload == 'false' }}
       with:
         matrix: affected-stacks.json
         sort-by: ${{ steps.config.outputs.sort-by }}
