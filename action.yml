@@ -82,16 +82,21 @@ runs:
         ref: ${{ inputs.head-ref }}
 
     - if: ${{ inputs.install-jq == 'true' }}
-      uses: dcarbone/install-jq-action@v2.1.0
+      uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
-        version: ${{ inputs.jq-version }}
-        force: ${{ inputs.jq-force }}
+        repo: jqlang/jq
+        tag: jq-${{ inputs.jq-version }}
+        cache: enable
 
     - if: ${{ inputs.install-atmos == 'true' }}
-      uses: cloudposse/github-action-setup-atmos@v2
+      uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
-        atmos-version: ${{ inputs.atmos-version }}
-        install-wrapper: false
+        repo: cloudposse/atmos
+        tag: ${{ startsWith(inputs.atmos-version, 'v') && inputs.atmos-version || format('v{0}', inputs.atmos-version) }}
+        extension-matching: false
+        rename-to: atmos
+        chmod: "0755"
+        cache: enable
 
     - name: Set vars
       shell: bash
@@ -116,10 +121,11 @@ runs:
 
     - name: Install OpenTofu
       if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
-      uses: opentofu/setup-opentofu@v1
+      uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
-        tofu_version: ${{ steps.config.outputs.opentofu-version }}
-        tofu_wrapper: false
+        repo: opentofu/opentofu
+        tag: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
+        cache: enable
 
     - name: Install Node
       uses: actions/setup-node@v4
