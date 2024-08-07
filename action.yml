@@ -89,14 +89,10 @@ runs:
         cache: enable
 
     - if: ${{ inputs.install-atmos == 'true' }}
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
+      uses: cloudposse/github-action-setup-atmos@v2
       with:
-        repo: cloudposse/atmos
-        tag: ${{ startsWith(inputs.atmos-version, 'v') && inputs.atmos-version || format('v{0}', inputs.atmos-version) }}
-        extension-matching: false
-        rename-to: atmos
-        chmod: "0755"
-        cache: enable
+        atmos-version: ${{ inputs.atmos-version }}
+        install-wrapper: false
 
     - name: Set vars
       shell: bash
