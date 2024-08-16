@@ -77,16 +77,21 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Install Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.head-ref }}
 
-    - if: ${{ inputs.install-jq == 'true' }}
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
+    - uses: cloudposse-github-actions/install-gh-releases@v1
       with:
-        repo: jqlang/jq
-        tag: jq-${{ inputs.jq-version }}
-        cache: enable
+        if: ${{ inputs.install-jq == 'true' }}
+        cache: true
+        config: |-
+          jqlang/jq: jq-${{ inputs.jq-version }}
 
     - if: ${{ inputs.install-atmos == 'true' }}
       uses: cloudposse/github-action-setup-atmos@v2
@@ -115,18 +120,13 @@ runs:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
 
-    - name: Install OpenTofu
+    - uses: cloudposse-github-actions/install-gh-releases@v1
       if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
-        repo: opentofu/opentofu
-        tag: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
-        cache: enable
+        cache: true
+        config: |-
+          opentofu/opentofu: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
 
-    - name: Install Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
 
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
