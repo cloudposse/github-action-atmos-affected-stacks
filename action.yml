@@ -54,7 +54,7 @@ inputs:
   jq-version:
     description: The version of jq to install if install-jq is true
     required: false
-    default: "1.6"
+    default: "1.7"
   jq-force:
     description: Whether to force the installation of jq
     required: false
@@ -87,8 +87,8 @@ runs:
         ref: ${{ inputs.head-ref }}
 
     - uses: cloudposse-github-actions/install-gh-releases@v1
+      if: ${{ inputs.install-jq == 'true' }}    
       with:
-        if: ${{ inputs.install-jq == 'true' }}
         cache: true
         config: |-
           jqlang/jq: jq-${{ inputs.jq-version }}
