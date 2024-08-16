@@ -120,13 +120,13 @@ runs:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
 
-    - uses: cloudposse-github-actions/install-gh-releases@v1
+    - name: Install OpenTofu
+      uses: cloudposse-github-actions/install-gh-releases@v1
       if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
       with:
         cache: true
         config: |-
           opentofu/opentofu: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
-
 
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
