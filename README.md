@@ -315,7 +315,7 @@ Which would produce the same behavior as in `v1`, doing this:
 | install-atmos | Whether to install atmos | true | false |
 | install-jq | Whether to install jq | false | false |
 | jq-force | Whether to force the installation of jq | true | false |
-| jq-version | The version of jq to install if install-jq is true | 1.6 | false |
+| jq-version | The version of jq to install if install-jq is true | 1.7 | false |
 | nested-matrices-count | Number of nested matrices that should be returned as the output (from 1 to 3) | 2 | false |
 
 
