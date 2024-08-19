@@ -28,6 +28,7 @@ jobs:
       - uses: ./
         id: current
         with:
+          iam-auth-enabled: false
           install-atmos: false
           atmos-config-path: "./tests"
 
