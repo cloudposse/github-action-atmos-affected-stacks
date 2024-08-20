@@ -1,35 +1,4 @@
 #!/bin/bash
 
 cat "${GITHUB_ACTION_PATH}/tests/fixtures/mock-atmos-describe-affected.json" > affected-stacks.json
-
-cat << EOF
-{
-   "integrations": {
-      "atlantis": {
-
-      },
-      "github": {
-         "gitops": {
-						"infracost-enabled": false,
-						"matrix": {
-							"group-by": ".stack_slug | split(\"-\") | [.[0], .[2]] | join(\"-\")",
-							"sort-by": ".stack_slug"
-						},
-						"role": {
-							"apply": "arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops",
-							"plan": "arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops"
-						},
-						"artifact-storage": {
-							"bucket": "cptest-core-ue2-auto-gitops",
-							"region": "us-east-2",
-							"role": "__PLAN_ROLE__",
-							"table": "cptest-core-ue2-auto-gitops-plan-storage"
-						},
-						"terraform-version": "1.5.2"
-				}
-			}
-   }
-}
-
-
-EOF
+cat ${ATMOS_CLI_CONFIG_PATH}/atmos.yaml | yq e --tojson '.' -
