@@ -41,7 +41,7 @@ jobs:
         with:
           cache: true
           config: |-
-            mikefarah/yq:v4.44.3
+            mikefarah/yq: v4.44.3
 
       - uses: ./
         id: current
