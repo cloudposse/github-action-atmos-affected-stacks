@@ -257,7 +257,7 @@ integrations:
         table: cptest-core-ue2-auto-gitops-plan-storage
         role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
       role:
-        plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+        plan: __PLAN_ROLE__
         apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
       matrix:
         sort-by: .stack_slug
