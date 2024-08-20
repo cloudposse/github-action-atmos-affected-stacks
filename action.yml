@@ -47,10 +47,6 @@ inputs:
     description: Whether to include dependents of affected stacks in the output
     required: false
     default: "false"
-  iam-auth-enabled:
-    description: Whether to assume the Terraform plan IAM role prior to running atmos commands
-    required: false
-    default: "true"
   install-jq:
     description: Whether to install jq
     required: false
@@ -150,7 +146,6 @@ runs:
       working-directory: base-ref
 
     - name: Configure Plan AWS Credentials
-      if: ${{ inputs.iam-auth-enabled == 'true' }}
       uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}

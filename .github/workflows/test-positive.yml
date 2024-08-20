@@ -7,6 +7,10 @@ on:
   # pull_request: {}
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -22,15 +26,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - shell: bash
+        run: |
+          mkdir -p ${{ runner.temp }}
+          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
+
       - name: add mock atmos to the path
         run: echo "./tests/fixtures" >> $GITHUB_PATH
 
       - uses: ./
         id: current
         with:
-          iam-auth-enabled: false
           install-atmos: false
-          atmos-config-path: "./tests"
+          atmos-config-path: ${{ runner.temp }}
 
     outputs:
       affected: "${{ steps.current.outputs.affected }}"
