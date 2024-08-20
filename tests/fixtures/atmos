@@ -19,10 +19,10 @@ cat << EOF
 							"apply": "arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops",
 							"plan": "arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops"
 						},
-						"storage": {
+						"artifact-storage": {
 							"bucket": "cptest-core-ue2-auto-gitops",
 							"region": "us-east-2",
-							"role": "arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha",
+							"role": "__PLAN_ROLE__",
 							"table": "cptest-core-ue2-auto-gitops-plan-storage"
 						},
 						"terraform-version": "1.5.2"
