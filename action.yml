@@ -145,14 +145,6 @@ runs:
       run: git checkout ${{ inputs.base-ref }}
       working-directory: base-ref
 
-    - name: Configure Plan AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4.0.2
-      with:
-        aws-region: ${{ steps.config.outputs.aws-region }}
-        role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
-        role-session-name: "atmos-terraform-plan-gitops"
-        mask-aws-account-id: "no"
-
     - name: atmos affected stacks for atmos pro
       id: affected-pro
       if: ${{ inputs.atmos-pro-upload == 'true' }}
