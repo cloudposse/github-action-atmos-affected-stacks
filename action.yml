@@ -177,7 +177,7 @@ runs:
         elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
           atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true
         else
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }}--file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
+          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
         fi
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
