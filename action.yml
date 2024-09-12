@@ -23,7 +23,7 @@ inputs:
   atmos-version:
     description: The version of atmos to install
     required: false
-    default: ">= 1.63.0"
+    default: ">= 1.80.0"
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
@@ -45,6 +45,10 @@ inputs:
     default: "false"
   atmos-include-dependents:
     description: Whether to include dependents of affected stacks in the output
+    required: false
+    default: "false"
+  atmos-include-settings:
+    description: Include the `settings` section for each affected component
     required: false
     default: "false"
   install-jq:
@@ -169,11 +173,11 @@ runs:
       shell: bash
       run: |
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-spacelift-admin-stacks=true
+          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-spacelift-admin-stacks=true
         elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true
+          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true
         else
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
+          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }}--file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
         fi
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
