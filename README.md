@@ -68,9 +68,11 @@ integrations:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
 ```
-
+  
 > [!IMPORTANT]
-> **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v2` version of this action.    
+> **Please note!**  This GitHub Action only works with `atmos >= 1.80.0`.
+> If you are using `atmos >= 1.63.0, < 1.80.0` please use `v3` version of this action.
+> If you are using `atmos < 1.63.0` please use `v2` version of this action.    
 
 ### Support OpenTofu
 
@@ -304,11 +306,12 @@ Which would produce the same behavior as in `v1`, doing this:
 |------|-------------|---------|----------|
 | atmos-config-path | The path to the atmos.yaml file | N/A | true |
 | atmos-include-dependents | Whether to include dependents of affected stacks in the output | false | false |
+| atmos-include-settings | Include the `settings` section for each affected component | false | false |
 | atmos-include-spacelift-admin-stacks | Whether to include the Spacelift admin stacks of affected stacks in the output | false | false |
 | atmos-pro-base-url | The base URL of Atmos Pro | https://app.cloudposse.com | false |
 | atmos-pro-token | The API token to allow Atmos Pro to upload affected stacks |  | false |
 | atmos-pro-upload | Whether to upload affected stacks directly to Atmos Pro | false | false |
-| atmos-version | The version of atmos to install | >= 1.63.0 | false |
+| atmos-version | The version of atmos to install | >= 1.80.0 | false |
 | base-ref | The base ref to checkout. If not provided, the head default branch is used. | N/A | false |
 | default-branch | The default branch to use for the base ref. | ${{ github.event.repository.default\_branch }} | false |
 | head-ref | The head ref to checkout. If not provided, the head default branch is used. | ${{ github.sha }} | false |
