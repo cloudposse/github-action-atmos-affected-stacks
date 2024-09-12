@@ -68,9 +68,11 @@ usage: |-
           sort-by: .stack_slug
           group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
   ```
-  
+    
   > [!IMPORTANT]
-  > **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v2` version of this action.    
+  > **Please note!**  This GitHub Action only works with `atmos >= 1.80.0`.
+  > If you are using `atmos >= 1.63.0, < 1.80.0` please use `v3` version of this action.
+  > If you are using `atmos < 1.63.0` please use `v2` version of this action.    
 
   ### Support OpenTofu
   

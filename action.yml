@@ -48,7 +48,7 @@ inputs:
     required: false
     default: "false"
   atmos-include-settings:
-    description: Include the `settings` section for each affected component (required atmos version >= 1.80.0)
+    description: Include the `settings` section for each affected component
     required: false
     default: "false"
   install-jq:
