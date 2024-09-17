@@ -150,6 +150,10 @@ runs:
       working-directory: base-ref
 
     - name: Configure Plan AWS Credentials
+      if: ${{ steps.config.outputs.aws-region != '' && 
+              steps.config.outputs.aws-region != 'null' && 
+              steps.config.outputs.terraform-plan-role != '' && 
+              steps.config.outputs.terraform-plan-role != 'null' }}
       uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
