@@ -190,7 +190,7 @@ runs:
       if: ${{ inputs.atmos-pro-upload == 'false' && steps.affected.outputs.affected == '[]' }}
       shell: bash
       run: |-
-        cat ${{ github.action_path }}/assets/summary.md >> $GITHUB_STEP_SUMMARY
+        cat "${GITHUB_ACTION_PATH}/assets/summary.md" >> $GITHUB_STEP_SUMMARY
 
     - uses: cloudposse/github-action-matrix-extended@v0
       id: matrix
