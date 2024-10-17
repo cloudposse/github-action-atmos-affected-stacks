@@ -182,11 +182,11 @@ runs:
       shell: bash
       run: |
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-spacelift-admin-stacks=true --stack="${{ inputs.atmos-stack }}"
+          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-spacelift-admin-stacks=true --stack=${{ inputs.atmos-stack }}
         elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true --stack="${{ inputs.atmos-stack }}"
+          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true --stack=${{ inputs.atmos-stack }}
         else
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --stack="${{ inputs.atmos-stack }}"
+          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --stack=${{ inputs.atmos-stack }}
         fi
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
