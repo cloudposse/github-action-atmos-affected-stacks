@@ -181,13 +181,19 @@ runs:
       if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
+        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path \"$GITHUB_WORKSPACE/base-ref\""
+        
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-spacelift-admin-stacks=true --stack=${{ inputs.atmos-stack }}
+          base_cmd+=" --include-spacelift-admin-stacks=true"
         elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true --stack=${{ inputs.atmos-stack }}
-        else
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --stack=${{ inputs.atmos-stack }}
+          base_cmd+=" --include-dependents=true"
         fi
+        
+        if [[ -n "${{ inputs.atmos-stack }}" ]]; then
+          base_cmd+=" --stack=${{ inputs.atmos-stack }}"
+        fi
+        
+        eval "$base_cmd"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
