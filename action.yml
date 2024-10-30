@@ -23,7 +23,7 @@ inputs:
   atmos-version:
     description: The version of atmos to install
     required: false
-    default: ">= 1.80.0"
+    default: ">= 1.96.0"
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
@@ -51,6 +51,10 @@ inputs:
     description: Include the `settings` section for each affected component
     required: false
     default: "false"
+  atmos-stack:
+    description: The stack to operate on
+    required: false
+    default: ""
   install-jq:
     description: Whether to install jq
     required: false
@@ -67,6 +71,7 @@ inputs:
     required: false
     description: "Number of nested matrices that should be returned as the output (from 1 to 3)"
     default: "2"
+  
 outputs:
   affected:
     description: The affected stacks
@@ -176,13 +181,19 @@ runs:
       if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
+        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path \"$GITHUB_WORKSPACE/base-ref\""
+        
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-spacelift-admin-stacks=true
+          base_cmd+=" --include-spacelift-admin-stacks=true"
         elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref" --include-dependents=true
-        else
-          atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
+          base_cmd+=" --include-dependents=true"
         fi
+        
+        if [[ -n "${{ inputs.atmos-stack }}" ]]; then
+          base_cmd+=" --stack=${{ inputs.atmos-stack }}"
+        fi
+        
+        eval "$base_cmd"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
