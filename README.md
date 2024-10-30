@@ -311,7 +311,8 @@ Which would produce the same behavior as in `v1`, doing this:
 | atmos-pro-base-url | The base URL of Atmos Pro | https://app.cloudposse.com | false |
 | atmos-pro-token | The API token to allow Atmos Pro to upload affected stacks |  | false |
 | atmos-pro-upload | Whether to upload affected stacks directly to Atmos Pro | false | false |
-| atmos-version | The version of atmos to install | >= 1.80.0 | false |
+| atmos-stack | The stack to operate on |  | false |
+| atmos-version | The version of atmos to install | >= 1.96.0 | false |
 | base-ref | The base ref to checkout. If not provided, the head default branch is used. | N/A | false |
 | default-branch | The default branch to use for the base ref. | ${{ github.event.repository.default\_branch }} | false |
 | head-ref | The head ref to checkout. If not provided, the head default branch is used. | ${{ github.sha }} | false |
