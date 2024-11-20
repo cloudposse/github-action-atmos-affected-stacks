@@ -123,6 +123,9 @@ runs:
         echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
         echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
+        echo "google-workload-identity-provider=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-workload-identity-provider"')" >> $GITHUB_OUTPUT
+        echo "google-service-account=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-service-account"')" >> $GITHUB_OUTPUT
+        echo "backend=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].backend')" >> $GITHUB_OUTPUT
 
     - name: Install Terraform
       if: ${{ steps.config.outputs.terraform-version != '' && steps.config.outputs.terraform-version != 'null' }}
@@ -157,6 +160,7 @@ runs:
     - name: Configure Plan AWS Credentials
       if: ${{ steps.config.outputs.aws-region != '' && 
               steps.config.outputs.aws-region != 'null' && 
+              steps.config.outputs.backend == 'aws' &&
               steps.config.outputs.terraform-plan-role != '' && 
               steps.config.outputs.terraform-plan-role != 'null' }}
       uses: aws-actions/configure-aws-credentials@v4.0.2
@@ -165,6 +169,13 @@ runs:
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
+
+    - name: Configure Google Credentials
+      if: ${{ steps.config.outputs.backend == 'google' }}
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ steps.config.outputs.google-workload-identity-provider }}
+        service_account: ${{ steps.config.outputs.google-service-account }}
 
     - name: atmos affected stacks for atmos pro
       id: affected-pro
