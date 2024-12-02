@@ -7,5 +7,4 @@ vars:
 components:
   terraform:
     test:
-      vars:
-        seed: 1
+      seed: 1
