@@ -9,10 +9,6 @@ inputs:
     description: The head ref to checkout. If not provided, the head default branch is used.
     required: false
     default: ${{ github.sha }}
-  skip-checkout:
-    description: "Disable actions/checkout for head-ref. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions"
-    required: false
-    default: 'false'    
   default-branch:
     description: The default branch to use for the base ref.
     required: false
@@ -27,7 +23,7 @@ inputs:
   atmos-version:
     description: The version of atmos to install
     required: false
-    default: ">= 1.99.0"
+    default: ">= 1.96.0"
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
@@ -96,7 +92,6 @@ runs:
         node-version: 20
 
     - uses: actions/checkout@v4
-      if: ${{ inputs.skip-checkout != 'true' }}
       with:
         ref: ${{ inputs.head-ref }}
 
@@ -164,7 +159,7 @@ runs:
               steps.config.outputs.aws-region != 'null' && 
               steps.config.outputs.terraform-plan-role != '' && 
               steps.config.outputs.terraform-plan-role != 'null' }}
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
