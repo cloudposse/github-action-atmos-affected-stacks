@@ -23,14 +23,38 @@ inputs:
   atmos-version:
     description: The version of atmos to install
     required: false
-    default: ">= 1.63.0"
+    default: ">= 1.96.0"
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
+  atmos-pro-upload:
+    description: Whether to upload affected stacks directly to Atmos Pro
+    required: false
+    default: "false"
+  atmos-pro-base-url:
+    description: The base URL of Atmos Pro
+    required: false
+    default: "https://app.cloudposse.com"
+  atmos-pro-token:
+    description: The API token to allow Atmos Pro to upload affected stacks
+    required: false
+    default: ""
   atmos-include-spacelift-admin-stacks:
     description: Whether to include the Spacelift admin stacks of affected stacks in the output
     required: false
     default: "false"
+  atmos-include-dependents:
+    description: Whether to include dependents of affected stacks in the output
+    required: false
+    default: "false"
+  atmos-include-settings:
+    description: Include the `settings` section for each affected component
+    required: false
+    default: "false"
+  atmos-stack:
+    description: The stack to operate on
+    required: false
+    default: ""
   install-jq:
     description: Whether to install jq
     required: false
@@ -38,15 +62,16 @@ inputs:
   jq-version:
     description: The version of jq to install if install-jq is true
     required: false
-    default: "1.6"
+    default: "1.7"
   jq-force:
     description: Whether to force the installation of jq
     required: false
     default: "true"
   nested-matrices-count:
     required: false
-    description: 'Number of nested matrices that should be returned as the output (from 1 to 3)'
+    description: "Number of nested matrices that should be returned as the output (from 1 to 3)"
     default: "2"
+  
 outputs:
   affected:
     description: The affected stacks
@@ -61,15 +86,21 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Install Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.head-ref }}
 
-    - if: ${{ inputs.install-jq == 'true' }}
-      uses: dcarbone/install-jq-action@v2.1.0
+    - uses: cloudposse-github-actions/install-gh-releases@v1
+      if: ${{ inputs.install-jq == 'true' }}    
       with:
-        version: ${{ inputs.jq-version }}
-        force: ${{ inputs.jq-force }}
+        cache: true
+        config: |-
+          jqlang/jq: jq-${{ inputs.jq-version }}
 
     - if: ${{ inputs.install-atmos == 'true' }}
       uses: cloudposse/github-action-setup-atmos@v2
@@ -80,14 +111,33 @@ runs:
     - name: Set vars
       shell: bash
       run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV 
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: config
       shell: bash
       id: config
       run: |-
+        echo "opentofu-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["opentofu-version"]')" >> $GITHUB_OUTPUT        
+        echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT      
         echo "group-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]')" >> $GITHUB_OUTPUT
-        echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT        
+        echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT
+        echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
+        echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
+
+    - name: Install Terraform
+      if: ${{ steps.config.outputs.terraform-version != '' && steps.config.outputs.terraform-version != 'null' }}
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ steps.config.outputs.terraform-version }}
+        terraform_wrapper: false
+
+    - name: Install OpenTofu
+      uses: cloudposse-github-actions/install-gh-releases@v1
+      if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
+      with:
+        cache: true
+        config: |-
+          opentofu/opentofu: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
 
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
@@ -95,35 +145,67 @@ runs:
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.default-branch }}
-        path: main-branch
+        path: base-ref
         fetch-depth: 0
 
-    - name: checkout head ref
+    - name: checkout base ref
       id: base-ref
       shell: bash
       run: git checkout ${{ inputs.base-ref }}
-      working-directory: main-branch
+      working-directory: base-ref
+
+    - name: Configure Plan AWS Credentials
+      if: ${{ steps.config.outputs.aws-region != '' && 
+              steps.config.outputs.aws-region != 'null' && 
+              steps.config.outputs.terraform-plan-role != '' && 
+              steps.config.outputs.terraform-plan-role != 'null' }}
+      uses: aws-actions/configure-aws-credentials@v4.0.2
+      with:
+        aws-region: ${{ steps.config.outputs.aws-region }}
+        role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
+        role-session-name: "atmos-terraform-plan-gitops"
+        mask-aws-account-id: "no"
+
+    - name: atmos affected stacks for atmos pro
+      id: affected-pro
+      if: ${{ inputs.atmos-pro-upload == 'true' }}
+      env:
+        ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}
+        ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
+      shell: bash
+      run: |
+        atmos describe affected --upload --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
 
     - name: atmos affected stacks
       id: affected
+      if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
+        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path \"$GITHUB_WORKSPACE/base-ref\""
+        
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch" --include-spacelift-admin-stacks=true
-        else
-          atmos describe affected --file affected-stacks.json --verbose=true --repo-path "$GITHUB_WORKSPACE/main-branch"
+          base_cmd+=" --include-spacelift-admin-stacks=true"
+        elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
+          base_cmd+=" --include-dependents=true"
         fi
+        
+        if [[ -n "${{ inputs.atmos-stack }}" ]]; then
+          base_cmd+=" --stack=${{ inputs.atmos-stack }}"
+        fi
+        
+        eval "$base_cmd"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
     - name: No changes summary
-      if: ${{ steps.affected.outputs.affected == '[]' }}
+      if: ${{ inputs.atmos-pro-upload == 'false' && steps.affected.outputs.affected == '[]' }}
       shell: bash
       run: |-
-        cat ${{ github.action_path }}/assets/summary.md >> $GITHUB_STEP_SUMMARY
+        cat "${GITHUB_ACTION_PATH}/assets/summary.md" >> $GITHUB_STEP_SUMMARY
 
     - uses: cloudposse/github-action-matrix-extended@v0
       id: matrix
+      if: ${{ inputs.atmos-pro-upload == 'false' }}
       with:
         matrix: affected-stacks.json
         sort-by: ${{ steps.config.outputs.sort-by }}

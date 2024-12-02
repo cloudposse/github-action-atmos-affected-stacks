@@ -7,6 +7,10 @@ on:
   # pull_request: {}
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -21,15 +25,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - shell: bash
+        run: |
+          mkdir -p ${{ runner.temp }}
+          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
 
       - name: add mock atmos to the path
         run: echo "./tests/fixtures" >> $GITHUB_PATH
+
+      - uses: cloudposse-github-actions/install-gh-releases@v1
+        with:
+          cache: true
+          config: |-
+            mikefarah/yq: v4.44.3
 
       - uses: ./
         id: current
         with:
           install-atmos: false
-          atmos-config-path: "./tests"
+          atmos-config-path: ${{ runner.temp }}
 
     outputs:
       affected: "${{ steps.current.outputs.affected }}"

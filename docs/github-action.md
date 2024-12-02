@@ -5,6 +5,7 @@
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
 | atmos-config-path | The path to the atmos.yaml file | N/A | true |
+| atmos-include-dependents | Whether to include dependents of affected stacks in the output | false | false |
 | atmos-include-spacelift-admin-stacks | Whether to include the Spacelift admin stacks of affected stacks in the output | false | false |
 | atmos-version | The version of atmos to install | >= 1.63.0 | false |
 | base-ref | The base ref to checkout. If not provided, the head default branch is used. | N/A | false |

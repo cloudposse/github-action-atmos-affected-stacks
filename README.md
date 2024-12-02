@@ -1,8 +1,9 @@
 
 
 <!-- markdownlint-disable -->
-# github-action-atmos-affected <a href="https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-atmos-affected-stacks&utm_content="><img align="right" src="https://cloudposse.com/logo-300x69.svg" width="150" /></a>
-<a href="https://github.com/cloudposse/github-action-atmos-affected-stacks/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-atmos-affected-stacks.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a>
+<a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse/github-action-atmos-affected-stacks/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
+    <p align="right">
+<a href="https://github.com/cloudposse/github-action-atmos-affected-stacks/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-atmos-affected-stacks.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a></p>
 <!-- markdownlint-restore -->
 
 <!--
@@ -52,6 +53,7 @@ The config should have the following structure:
 integrations:
   github:
     gitops:
+      opentofu-version: 1.7.3  
       terraform-version: 1.5.2
       infracost-enabled: false
       artifact-storage:
@@ -66,54 +68,87 @@ integrations:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
 ```
+  
+> [!IMPORTANT]
+> **Please note!**  This GitHub Action only works with `atmos >= 1.80.0`.
+> If you are using `atmos >= 1.63.0, < 1.80.0` please use `v3` version of this action.
+> If you are using `atmos < 1.63.0` please use `v2` version of this action.    
+
+### Support OpenTofu
+
+This action supports [OpenTofu](https://opentofu.org/).
 
 > [!IMPORTANT]
-> **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v2` version of this action.    
+> **Please note!** OpenTofu supported by Atmos `>= 1.73.0`.
+> For details [read](https://atmos.tools/core-concepts/projects/configuration/opentofu/)
+
+To enable OpenTofu add the following settings to `atmos.yaml`
+  * Set the `opentofu-version` in the `atmos.yaml` to the desired version
+  * Set `components.terraform.command` to `tofu`
+
+#### Example
+
+```yaml
+
+components:
+  terraform:
+    command: tofu
+
+...
+
+integrations:
+  github:
+    gitops:
+      opentofu-version: 1.7.3
+      ...
+```
 
 ### Workflow example
 
 ```yaml
-  name: Pull Request
-  on:
-    pull_request:
-      branches: [ 'main' ]
-      types: [opened, synchronize, reopened, closed, labeled, unlabeled]
+name: Pull Request
+on:
+  pull_request:
+    branches: [ 'main' ]
+    types: [opened, synchronize, reopened, closed, labeled, unlabeled]
 
-  jobs:
-    context:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-        - id: affected
-          uses: cloudposse/github-action-atmos-affected-stacks@v3
-          with:
-            atmos-config-path: ./rootfs/usr/local/etc/atmos/
-            atmos-version: 1.63.0
-            nested-matrices-count: 1
+jobs:
+  atmos-affected:
+    runs-on: ubuntu-latest
+    steps:
+      - id: affected
+        uses: cloudposse/github-action-atmos-affected-stacks@v3
+        with:
+          atmos-config-path: ./rootfs/usr/local/etc/atmos/
+          atmos-version: 1.63.0
+          nested-matrices-count: 1
 
-      outputs:
-        affected: ${{ steps.affected.outputs.affected }}
-        matrix: ${{ steps.affected.outputs.matrix }}
+    outputs:
+      matrix: ${{ steps.affected.outputs.matrix }}
+      has-affected-stacks: ${{ steps.affected.outputs.has-affected-stacks }}
 
-    atmos-plan:
-      needs: ["atmos-affected"]
-      if: ${{ needs.atmos-affected.outputs.has-affected-stacks == 'true' }}
-      name: ${{ matrix.stack_slug }}
-      runs-on: ['self-hosted']
-      strategy:
-        max-parallel: 10
-        fail-fast: false # Don't fail fast to avoid locking TF State
-        matrix: ${{ fromJson(needs.atmos-affected.outputs.matrix) }}
-      ## Avoid running the same stack in parallel mode (from different workflows)
-      concurrency:
-        group: ${{ matrix.stack_slug }}
-        cancel-in-progress: false
-      steps:
-        - name: Plan Atmos Component
-          uses: cloudposse/github-action-atmos-terraform-plan@v1
-          with:
-            component: ${{ matrix.component }}
-            stack: ${{ matrix.stack }}
+  # This job is an example how to use the affected stacks with the matrix strategy
+  atmos-plan:
+    needs: ["atmos-affected"]
+    if: ${{ needs.atmos-affected.outputs.has-affected-stacks == 'true' }}
+    name: Plan ${{ matrix.stack_slug }}
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 10
+      fail-fast: false # Don't fail fast to avoid locking TF State
+      matrix: ${{ fromJson(needs.atmos-affected.outputs.matrix) }}
+    ## Avoid running the same stack in parallel mode (from different workflows)
+    concurrency:
+      group: ${{ matrix.stack_slug }}
+      cancel-in-progress: false
+    steps:
+      - name: Plan Atmos Component
+        uses: cloudposse/github-action-atmos-terraform-plan@v2
+        with:
+          component: ${{ matrix.component }}
+          stack: ${{ matrix.stack }}
+          atmos-config-path: ./rootfs/usr/local/etc/atmos/
+          atmos-version: 1.63.0
 ```
   
 ### Migrating from `v2` to `v3`
@@ -270,15 +305,21 @@ Which would produce the same behavior as in `v1`, doing this:
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
 | atmos-config-path | The path to the atmos.yaml file | N/A | true |
+| atmos-include-dependents | Whether to include dependents of affected stacks in the output | false | false |
+| atmos-include-settings | Include the `settings` section for each affected component | false | false |
 | atmos-include-spacelift-admin-stacks | Whether to include the Spacelift admin stacks of affected stacks in the output | false | false |
-| atmos-version | The version of atmos to install | >= 1.63.0 | false |
+| atmos-pro-base-url | The base URL of Atmos Pro | https://app.cloudposse.com | false |
+| atmos-pro-token | The API token to allow Atmos Pro to upload affected stacks |  | false |
+| atmos-pro-upload | Whether to upload affected stacks directly to Atmos Pro | false | false |
+| atmos-stack | The stack to operate on |  | false |
+| atmos-version | The version of atmos to install | >= 1.96.0 | false |
 | base-ref | The base ref to checkout. If not provided, the head default branch is used. | N/A | false |
 | default-branch | The default branch to use for the base ref. | ${{ github.event.repository.default\_branch }} | false |
 | head-ref | The head ref to checkout. If not provided, the head default branch is used. | ${{ github.sha }} | false |
 | install-atmos | Whether to install atmos | true | false |
 | install-jq | Whether to install jq | false | false |
 | jq-force | Whether to force the installation of jq | true | false |
-| jq-version | The version of jq to install if install-jq is true | 1.6 | false |
+| jq-version | The version of jq to install if install-jq is true | 1.7 | false |
 | nested-matrices-count | Number of nested matrices that should be returned as the output (from 1 to 3) | 2 | false |
 
 
