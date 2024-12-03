@@ -46,7 +46,21 @@ raw list of affected stacks as an output as well as a matrix that can be used fu
 
 ### Config
 
+> [!IMPORTANT]
+> **Please note!**  This GitHub Action only works with `atmos >= 1.99.0`.
+> If you are using `atmos >= 1.80.0, < 1.99.0` please use `v5` version of this action.
+> If you are using `atmos >= 1.63.0, < 1.80.0` please use `v3` or `v4` version of this action.
+> If you are using `atmos < 1.63.0` please use `v2` version of this action.    
+
+
 The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
+
+The action supports AWS and Azure to store Terraform plan files. 
+You can read more about plan storage in the [cloudposse/github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage?tab=readme-ov-file#aws-default) documentation. 
+Depends of cloud provider the following fields should be set in the `atmos.yaml`:
+
+#### AWS
+
 The config should have the following structure:
 
 ```yaml
@@ -63,16 +77,63 @@ integrations:
         role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
       role:
         plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+        # Set `apply` empty if you don't want to assume IAM role before terraform apply
         apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
       matrix:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
 ```
-  
+
+#### Azure
+
+The config should have the following structure:
+
+```yaml
+integrations:
+  github:
+    gitops:
+      opentofu-version: 1.7.3  
+      terraform-version: 1.5.2
+      infracost-enabled: false
+      artifact-storage:
+        plan-repository-type: azureblob
+        blob-account-name: tfplans
+        blob-container-name: plans
+        metadata-repository-type: cosmos
+        cosmos-container-name: terraform-plan-storage
+        cosmos-database-name: terraform-plan-storage
+        cosmos-endpoint: "https://my-cosmo-account.documents.azure.com:443/"
+      # We remove the `role` section as it is AWS specific
+      matrix:
+        sort-by: .stack_slug
+        group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+```
+
+### Stack level configuration
+
 > [!IMPORTANT]
-> **Please note!**  This GitHub Action only works with `atmos >= 1.80.0`.
-> If you are using `atmos >= 1.63.0, < 1.80.0` please use `v3` version of this action.
-> If you are using `atmos < 1.63.0` please use `v2` version of this action.    
+> Wherever it is possible to specify `integration.github.gitops` on stack level 
+> it is required to define default values in `atmos.yaml`
+
+It is possible to override integration settings on a stack level by defining `settings.integrations`.
+
+```yaml
+components:
+  terraform:
+    foobar:
+      settings:
+        integrations:
+          github:
+            gitops:
+              artifact-storage:
+                bucket: cptest-plat-ue2-auto-gitops
+                table: cptest-plat-ue2-auto-gitops-plan-storage
+                role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-plat-ue2-auto-gitops-gha
+              role:
+                # Set `plan` empty if you don't want to assume IAM role before terraform plan  
+                plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-plat-gbl-identity-gitops
+                apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-plat-gbl-identity-gitops
+```    
 
 ### Support OpenTofu
 
@@ -101,8 +162,8 @@ integrations:
     gitops:
       opentofu-version: 1.7.3
       ...
-```
-
+```  
+  
 ### Workflow example
 
 ```yaml
@@ -117,10 +178,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: affected
-        uses: cloudposse/github-action-atmos-affected-stacks@v3
+        uses: cloudposse/github-action-atmos-affected-stacks@v6
         with:
           atmos-config-path: ./rootfs/usr/local/etc/atmos/
-          atmos-version: 1.63.0
+          atmos-version: 1.99.0
           nested-matrices-count: 1
 
     outputs:
@@ -143,13 +204,41 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Plan Atmos Component
-        uses: cloudposse/github-action-atmos-terraform-plan@v2
+        uses: cloudposse/github-action-atmos-terraform-plan@v4
         with:
           component: ${{ matrix.component }}
           stack: ${{ matrix.stack }}
           atmos-config-path: ./rootfs/usr/local/etc/atmos/
-          atmos-version: 1.63.0
+          atmos-version: 1.99.0
 ```
+
+### Migrating from `v5` to `v6`
+
+The notable changes in `v6` are:
+
+- `v6` works only with `atmos >= 1.99.0`
+- `v6` allow to skip internal checkout with `skip-checkout` input
+
+
+The only required migration step is updating atmos version to `>= 1.80.0`
+
+
+### Migrating from `v4` to `v5`
+
+The notable changes in `v5` are:
+
+- `v5` works only with `atmos >= 1.80.0`
+- `v5` supports atmos templating
+
+The only required migration step is updating atmos version to `>= 1.80.0`
+
+### Migrating from `v3` to `v4`
+
+The notable changes in `v4` are:
+
+- `v4` perform aws authentication assuming `integrations.github.gitops.role.plan` IAM role
+
+No special migration steps required
   
 ### Migrating from `v2` to `v3`
 
@@ -312,7 +401,7 @@ Which would produce the same behavior as in `v1`, doing this:
 | atmos-pro-token | The API token to allow Atmos Pro to upload affected stacks |  | false |
 | atmos-pro-upload | Whether to upload affected stacks directly to Atmos Pro | false | false |
 | atmos-stack | The stack to operate on |  | false |
-| atmos-version | The version of atmos to install | >= 1.96.0 | false |
+| atmos-version | The version of atmos to install | >= 1.99.0 | false |
 | base-ref | The base ref to checkout. If not provided, the head default branch is used. | N/A | false |
 | default-branch | The default branch to use for the base ref. | ${{ github.event.repository.default\_branch }} | false |
 | head-ref | The head ref to checkout. If not provided, the head default branch is used. | ${{ github.sha }} | false |
@@ -321,6 +410,7 @@ Which would produce the same behavior as in `v1`, doing this:
 | jq-force | Whether to force the installation of jq | true | false |
 | jq-version | The version of jq to install if install-jq is true | 1.7 | false |
 | nested-matrices-count | Number of nested matrices that should be returned as the output (from 1 to 3) | 2 | false |
+| skip-checkout | Disable actions/checkout for head-ref. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions | false | false |
 
 
 ## Outputs
