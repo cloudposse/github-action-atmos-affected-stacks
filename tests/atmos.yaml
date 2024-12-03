@@ -262,5 +262,3 @@ integrations:
       matrix:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
-
-    base_path: "stacks/schemas/cue"

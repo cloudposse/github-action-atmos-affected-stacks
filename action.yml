@@ -87,6 +87,7 @@ outputs:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
     value: ${{ steps.matrix.outputs.matrix }}
 
+
 runs:
   using: "composite"
   steps:
