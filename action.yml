@@ -75,6 +75,10 @@ inputs:
     required: false
     description: "Number of nested matrices that should be returned as the output (from 1 to 3)"
     default: "2"
+  skip-atmos-functions:
+    required: false
+    description: "Skip all Atmos functions such as terraform.output"
+    default: "false"
   
 outputs:
   affected:
@@ -197,6 +201,10 @@ runs:
         
         if [[ -n "${{ inputs.atmos-stack }}" ]]; then
           base_cmd+=" --stack=${{ inputs.atmos-stack }}"
+        fi
+
+        if [[ "${{ inputs.skip-atmos-functions }}" == "true" ]]; then
+          base_cmd+=" --skip=terraform.output"
         fi
         
         eval "$base_cmd"

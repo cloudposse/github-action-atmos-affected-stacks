@@ -64,7 +64,9 @@ workflows:
 
 logs:
   verbose: false
-  colors: true
+  colors: false
+  level: Trace
+  file: "/tmp/atmos.log"
 
 # Custom CLI commands
 commands:

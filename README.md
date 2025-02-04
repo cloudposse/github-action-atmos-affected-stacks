@@ -410,6 +410,7 @@ Which would produce the same behavior as in `v1`, doing this:
 | jq-force | Whether to force the installation of jq | true | false |
 | jq-version | The version of jq to install if install-jq is true | 1.7 | false |
 | nested-matrices-count | Number of nested matrices that should be returned as the output (from 1 to 3) | 2 | false |
+| skip-atmos-functions | Skip all Atmos functions such as terraform.output | false | false |
 | skip-checkout | Disable actions/checkout for head-ref. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions | false | false |
 
 
@@ -511,7 +512,7 @@ All other trademarks referenced herein are the property of their respective owne
 
 
 ---
-Copyright © 2017-2024 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2025 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 <a href="https://cloudposse.com/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-atmos-affected-stacks&utm_content=readme_footer_link"><img alt="README footer" src="https://cloudposse.com/readme/footer/img"/></a>
