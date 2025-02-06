@@ -75,11 +75,15 @@ inputs:
     required: false
     description: "Number of nested matrices that should be returned as the output (from 1 to 3)"
     default: "2"
+  process-templates:
+    required: false
+    description: "Whether to process templates"
+    default: "true"    
   skip-atmos-functions:
     required: false
     description: "Skip all Atmos functions such as terraform.output"
     default: "false"
-  
+      
 outputs:
   affected:
     description: The affected stacks
@@ -207,6 +211,9 @@ runs:
           base_cmd+=" --skip=terraform.output"
         fi
         
+        if [[ "${{ inputs.process-templates }}" == "false" ]]; then
+          base_cmd+=" --process-templates=false"
+        fi
         eval "$base_cmd"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT

@@ -21,6 +21,7 @@
 | jq-force | Whether to force the installation of jq | true | false |
 | jq-version | The version of jq to install if install-jq is true | 1.7 | false |
 | nested-matrices-count | Number of nested matrices that should be returned as the output (from 1 to 3) | 2 | false |
+| process-templates | Whether to process templates | true | false |
 | skip-atmos-functions | Skip all Atmos functions such as terraform.output | false | false |
 | skip-checkout | Disable actions/checkout for head-ref. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions | false | false |
 
