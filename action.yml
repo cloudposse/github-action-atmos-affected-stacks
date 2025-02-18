@@ -85,7 +85,7 @@ inputs:
     default: "false"
   verbose:
     required: false
-    description: "Wheter to enable the verbose mode of the Atmos commands"
+    description: "Whether to enable the verbose mode of the Atmos commands"
     default: "true"
       
 outputs:
