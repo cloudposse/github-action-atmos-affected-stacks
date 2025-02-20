@@ -83,6 +83,10 @@ inputs:
     required: false
     description: "Skip all Atmos functions such as terraform.output"
     default: "false"
+  verbose:
+    required: false
+    description: "Whether to enable the verbose mode of the Atmos commands"
+    default: "true"
       
 outputs:
   affected:
@@ -188,14 +192,14 @@ runs:
         ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
       shell: bash
       run: |
-        atmos describe affected --upload --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
+        atmos describe affected --upload --verbose=${{ inputs.verbose }} --repo-path "$GITHUB_WORKSPACE/base-ref"
 
     - name: atmos affected stacks
       id: affected
       if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
-        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path \"$GITHUB_WORKSPACE/base-ref\""
+        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=${{ inputs.verbose }} --repo-path \"$GITHUB_WORKSPACE/base-ref\""
         
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
           base_cmd+=" --include-spacelift-admin-stacks=true"
