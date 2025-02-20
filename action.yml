@@ -75,9 +75,13 @@ inputs:
     required: false
     description: "Number of nested matrices that should be returned as the output (from 1 to 3)"
     default: "2"
+  process-functions:
+    required: false
+    description: "Whether to process atmos functions"
+    default: "true"
   process-templates:
     required: false
-    description: "Whether to process templates"
+    description: "Whether to process atmos templates"
     default: "true"    
   skip-atmos-functions:
     required: false
