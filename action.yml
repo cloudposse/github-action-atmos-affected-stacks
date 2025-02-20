@@ -218,6 +218,10 @@ runs:
         if [[ "${{ inputs.process-templates }}" == "false" ]]; then
           base_cmd+=" --process-templates=false"
         fi
+
+        if [[ "${{ inputs.process-functions }}" == "false" ]]; then
+          base_cmd+=" --process-functions=false"
+        fi        
         eval "$base_cmd"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
