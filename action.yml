@@ -12,7 +12,7 @@ inputs:
   skip-checkout:
     description: "Disable actions/checkout for head-ref and base-ref. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions"
     required: false
-    default: 'false'    
+    default: "false"
   default-branch:
     description: The default branch to use for the base ref.
     required: false
@@ -82,7 +82,7 @@ inputs:
   process-templates:
     required: false
     description: "Whether to process atmos templates"
-    default: "true"    
+    default: "true"
   skip-atmos-functions:
     required: false
     description: "Skip all Atmos functions such as terraform.output"
@@ -91,7 +91,7 @@ inputs:
     required: false
     description: "Whether to enable the verbose mode of the Atmos commands"
     default: "true"
-      
+
 outputs:
   affected:
     description: The affected stacks
@@ -102,7 +102,6 @@ outputs:
   matrix:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
     value: ${{ steps.matrix.outputs.matrix }}
-
 
 runs:
   using: "composite"
@@ -118,7 +117,7 @@ runs:
         ref: ${{ inputs.head-ref }}
 
     - uses: cloudposse-github-actions/install-gh-releases@v1
-      if: ${{ inputs.install-jq == 'true' }}    
+      if: ${{ inputs.install-jq == 'true' }}
       with:
         cache: true
         config: |-
@@ -165,6 +164,7 @@ runs:
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
     # look at the contents of the stack files to determine if any have changed.
     - uses: actions/checkout@v4
+      if: ${{ inputs.skip-checkout != 'true' }}
       with:
         ref: ${{ inputs.default-branch }}
         path: base-ref
@@ -173,14 +173,14 @@ runs:
     - name: checkout base ref
       id: base-ref
       shell: bash
-      run: git checkout ${{ inputs.base-ref }}
+      run: git checkout ${{ inputs.skip-checkout == 'true' && '-f' || '' }} ${{ inputs.base-ref }}
       working-directory: base-ref
 
     - name: Configure Plan AWS Credentials
-      if: ${{ steps.config.outputs.aws-region != '' && 
-              steps.config.outputs.aws-region != 'null' && 
-              steps.config.outputs.terraform-plan-role != '' && 
-              steps.config.outputs.terraform-plan-role != 'null' }}
+      if: ${{ steps.config.outputs.aws-region != '' &&
+        steps.config.outputs.aws-region != 'null' &&
+        steps.config.outputs.terraform-plan-role != '' &&
+        steps.config.outputs.terraform-plan-role != 'null' }}
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
@@ -204,13 +204,13 @@ runs:
       shell: bash
       run: |
         base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=${{ inputs.verbose }} --repo-path \"$GITHUB_WORKSPACE/base-ref\""
-        
+
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
           base_cmd+=" --include-spacelift-admin-stacks=true"
         elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
           base_cmd+=" --include-dependents=true"
         fi
-        
+
         if [[ -n "${{ inputs.atmos-stack }}" ]]; then
           base_cmd+=" --stack=${{ inputs.atmos-stack }}"
         fi
@@ -218,7 +218,7 @@ runs:
         if [[ "${{ inputs.skip-atmos-functions }}" == "true" ]]; then
           base_cmd+=" --skip=terraform.output"
         fi
-        
+
         if [[ "${{ inputs.process-templates }}" == "false" ]]; then
           base_cmd+=" --process-templates=false"
         fi
