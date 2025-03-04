@@ -9,6 +9,10 @@ inputs:
     description: The head ref to checkout. If not provided, the head default branch is used.
     required: false
     default: ${{ github.sha }}
+  skip-checkout:
+    description: "Disable actions/checkout for head-ref and base-ref. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions"
+    required: false
+    default: 'false'    
   default-branch:
     description: The default branch to use for the base ref.
     required: false
@@ -23,7 +27,7 @@ inputs:
   atmos-version:
     description: The version of atmos to install
     required: false
-    default: ">= 1.96.0"
+    default: ">= 1.99.0"
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
@@ -71,7 +75,23 @@ inputs:
     required: false
     description: "Number of nested matrices that should be returned as the output (from 1 to 3)"
     default: "2"
-  
+  process-functions:
+    required: false
+    description: "Whether to process atmos functions"
+    default: "true"
+  process-templates:
+    required: false
+    description: "Whether to process atmos templates"
+    default: "true"    
+  skip-atmos-functions:
+    required: false
+    description: "Skip all Atmos functions such as terraform.output"
+    default: "false"
+  verbose:
+    required: false
+    description: "Whether to enable the verbose mode of the Atmos commands"
+    default: "true"
+      
 outputs:
   affected:
     description: The affected stacks
@@ -83,6 +103,7 @@ outputs:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
     value: ${{ steps.matrix.outputs.matrix }}
 
+
 runs:
   using: "composite"
   steps:
@@ -92,6 +113,7 @@ runs:
         node-version: 20
 
     - uses: actions/checkout@v4
+      if: ${{ inputs.skip-checkout != 'true' }}
       with:
         ref: ${{ inputs.head-ref }}
 
@@ -159,7 +181,7 @@ runs:
               steps.config.outputs.aws-region != 'null' && 
               steps.config.outputs.terraform-plan-role != '' && 
               steps.config.outputs.terraform-plan-role != 'null' }}
-      uses: aws-actions/configure-aws-credentials@v4.0.2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
@@ -174,14 +196,14 @@ runs:
         ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
       shell: bash
       run: |
-        atmos describe affected --upload --verbose=true --repo-path "$GITHUB_WORKSPACE/base-ref"
+        atmos describe affected --upload --verbose=${{ inputs.verbose }} --repo-path "$GITHUB_WORKSPACE/base-ref"
 
     - name: atmos affected stacks
       id: affected
       if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
-        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=true --repo-path \"$GITHUB_WORKSPACE/base-ref\""
+        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=${{ inputs.verbose }} --repo-path \"$GITHUB_WORKSPACE/base-ref\""
         
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
           base_cmd+=" --include-spacelift-admin-stacks=true"
@@ -192,7 +214,18 @@ runs:
         if [[ -n "${{ inputs.atmos-stack }}" ]]; then
           base_cmd+=" --stack=${{ inputs.atmos-stack }}"
         fi
+
+        if [[ "${{ inputs.skip-atmos-functions }}" == "true" ]]; then
+          base_cmd+=" --skip=terraform.output"
+        fi
         
+        if [[ "${{ inputs.process-templates }}" == "false" ]]; then
+          base_cmd+=" --process-templates=false"
+        fi
+
+        if [[ "${{ inputs.process-functions }}" == "false" ]]; then
+          base_cmd+=" --process-functions=false"
+        fi        
         eval "$base_cmd"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT

@@ -64,7 +64,9 @@ workflows:
 
 logs:
   verbose: false
-  colors: true
+  colors: false
+  level: Trace
+  file: "/tmp/atmos.log"
 
 # Custom CLI commands
 commands:
@@ -262,21 +264,3 @@ integrations:
       matrix:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
-
-# Validation schemas (for validating atmos stacks and components)
-schemas:
-  # https://json-schema.org
-  jsonschema:
-    # Can also be set using 'ATMOS_SCHEMAS_JSONSCHEMA_BASE_PATH' ENV var, or '--schemas-jsonschema-dir' command-line arguments
-    # Supports both absolute and relative paths
-    base_path: "stacks/schemas/jsonschema"
-  # https://www.openpolicyagent.org
-  opa:
-    # Can also be set using 'ATMOS_SCHEMAS_OPA_BASE_PATH' ENV var, or '--schemas-opa-dir' command-line arguments
-    # Supports both absolute and relative paths
-    base_path: "stacks/schemas/opa"
-  # https://cuelang.org
-  cue:
-    # Can also be set using 'ATMOS_SCHEMAS_CUE_BASE_PATH' ENV var, or '--schemas-cue-dir' command-line arguments
-    # Supports both absolute and relative paths
-    base_path: "stacks/schemas/cue"
