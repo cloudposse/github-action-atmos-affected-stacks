@@ -196,7 +196,7 @@ runs:
         ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
       shell: bash
       run: |
-        atmos describe affected --upload --verbose=${{ inputs.verbose }} --repo-path "$GITHUB_WORKSPACE/base-ref"
+        atmos describe affected --upload=true --verbose=${{ inputs.verbose }} --repo-path "$GITHUB_WORKSPACE/base-ref"
 
     - name: atmos affected stacks
       id: affected
