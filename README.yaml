@@ -1,4 +1,3 @@
----
 #
 # This is the canonical configuration for the `README.md`
 # Run `make readme` to rebuild the `README.md`
@@ -22,13 +21,17 @@ github_repo: cloudposse/github-action-atmos-affected-stacks
 
 # Badges to display
 badges:
-  - name: "Latest Release"
-    image: "https://img.shields.io/github/release/cloudposse/github-action-atmos-affected-stacks.svg"
-    url: "https://github.com/cloudposse/github-action-atmos-affected-stacks/releases/latest"
-  - name: "Slack Community"
-    image: "https://slack.cloudposse.com/badge.svg"
-    url: "https://slack.cloudposse.com"
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudposse/github-action-atmos-affected-stacks.svg?style=for-the-badge
+    url: https://github.com/cloudposse/github-action-atmos-affected-stacks/releases/latest
+  - name: Last Updated
+    image: https://img.shields.io/github/last-commit/cloudposse/github-action-atmos-affected-stacks.svg?style=for-the-badge
+    url: https://github.com/cloudposse/github-action-atmos-affected-stacks/commits
+  - name: Slack Community
+    image: https://slack.cloudposse.com/for-the-badge.svg
+    url: https://cloudposse.com/slack
 
+# List any related terraform modules that this module may be used with or that this module depends on.
 related: []
 
 # Short description of this project
@@ -42,8 +45,8 @@ introduction: |-
 references: []
 
 # How to use this project
-usage: |-
-  
+usage: |2-
+
   ### Config
 
   > [!IMPORTANT]
@@ -54,15 +57,15 @@ usage: |-
 
 
   The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
-  
+
   The action supports AWS and Azure to store Terraform plan files. 
   You can read more about plan storage in the [cloudposse/github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage?tab=readme-ov-file#aws-default) documentation. 
   Depends of cloud provider the following fields should be set in the `atmos.yaml`:
-  
+
   #### AWS
-  
+
   The config should have the following structure:
-  
+
   ```yaml
   integrations:
     github:
@@ -85,9 +88,9 @@ usage: |-
   ```
 
   #### Azure
-  
+
   The config should have the following structure:
-  
+
   ```yaml
   integrations:
     github:
@@ -136,27 +139,27 @@ usage: |-
   ```    
 
   ### Support OpenTofu
-  
+
   This action supports [OpenTofu](https://opentofu.org/).
-  
+
   > [!IMPORTANT]
   > **Please note!** OpenTofu supported by Atmos `>= 1.73.0`.
   > For details [read](https://atmos.tools/core-concepts/projects/configuration/opentofu/)
-  
+
   To enable OpenTofu add the following settings to `atmos.yaml`
     * Set the `opentofu-version` in the `atmos.yaml` to the desired version
     * Set `components.terraform.command` to `tofu`
-  
+
   #### Example
-  
+
   ```yaml
-  
+
   components:
     terraform:
       command: tofu
-  
+
   ...
-  
+
   integrations:
     github:
       gitops:
@@ -165,14 +168,14 @@ usage: |-
   ```  
     
   ### Workflow example
-  
+
   ```yaml
   name: Pull Request
   on:
     pull_request:
       branches: [ 'main' ]
       types: [opened, synchronize, reopened, closed, labeled, unlabeled]
-  
+
   jobs:
     atmos-affected:
       runs-on: ubuntu-latest
@@ -183,11 +186,11 @@ usage: |-
             atmos-config-path: ./rootfs/usr/local/etc/atmos/
             atmos-version: 1.99.0
             nested-matrices-count: 1
-  
+
       outputs:
         matrix: ${{ steps.affected.outputs.matrix }}
         has-affected-stacks: ${{ steps.affected.outputs.has-affected-stacks }}
-  
+
     # This job is an example how to use the affected stacks with the matrix strategy
     atmos-plan:
       needs: ["atmos-affected"]
@@ -213,51 +216,51 @@ usage: |-
   ```
 
   ### Migrating from `v5` to `v6`
-  
+
   The notable changes in `v6` are:
 
   - `v6` works only with `atmos >= 1.99.0`
   - `v6` allow to skip internal checkout with `skip-checkout` input
 
-  
+
   The only required migration step is updating atmos version to `>= 1.80.0`
 
 
   ### Migrating from `v4` to `v5`
-  
+
   The notable changes in `v5` are:
 
   - `v5` works only with `atmos >= 1.80.0`
   - `v5` supports atmos templating
-  
+
   The only required migration step is updating atmos version to `>= 1.80.0`
 
   ### Migrating from `v3` to `v4`
-  
+
   The notable changes in `v4` are:
 
   - `v4` perform aws authentication assuming `integrations.github.gitops.role.plan` IAM role
-  
+
   No special migration steps required
     
   ### Migrating from `v2` to `v3`
-  
+
   The notable changes in `v3` are:
-  
+
   - `v3` works only with `atmos >= 1.63.0`
   - `v3` drops `install-terraform` input because terraform is not required for affected stacks call
   - `v3` drops `atmos-gitops-config-path` input and the `./.github/config/atmos-gitops.yaml` config file. Now you have to use GitHub Actions environment variables to specify the location of the `atmos.yaml`.
-  
+
   The following configuration fields now moved to GitHub action inputs with the same names
-  
+
   |         name            |
   |-------------------------|
   | `atmos-version`         |
   | `atmos-config-path`     |
-  
-  
+
+
   The following configuration fields moved to the `atmos.yaml` configuration file.
-  
+
   |         name             |    YAML path in `atmos.yaml`                    |
   |--------------------------|-------------------------------------------------|
   | `aws-region`             | `integrations.github.gitops.artifact-storage.region`     | 
@@ -270,14 +273,14 @@ usage: |-
   | `enable-infracost`       | `integrations.github.gitops.infracost-enabled`  |
   | `sort-by`                | `integrations.github.gitops.matrix.sort-by`     |
   | `group-by`               | `integrations.github.gitops.matrix.group-by`    |
-  
-  
+
+
   For example, to migrate from `v2` to `v3`, you should have something similar to the following in your `atmos.yaml`: 
-  
+
   `./.github/config/atmos.yaml`
   ```yaml
   # ... your existing configuration
-  
+
   integrations:
     github:
       gitops:
@@ -295,7 +298,7 @@ usage: |-
           sort-by: .stack_slug
           group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
   ```
-  
+
   `.github/workflows/main.yaml`
   ```yaml
     - id: affected
@@ -304,9 +307,9 @@ usage: |-
         atmos-config-path: ./rootfs/usr/local/etc/atmos/
         atmos-version: 1.63.0
   ``` 
-  
+
   This corresponds to the `v2` configuration (deprecated) below.
-  
+
   The `v2` configuration file `./.github/config/atmos-gitops.yaml` looked like this:
   ```yaml
   atmos-version: 1.45.3
@@ -322,9 +325,9 @@ usage: |-
   sort-by: .stack_slug
   group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
   ```
-  
+
   And the `v2` GitHub Action Workflow looked like this.
-  
+
   `.github/workflows/main.yaml`
   ```yaml
     - id: affected
@@ -335,9 +338,9 @@ usage: |-
    
     
   ### Migrating from `v1` to `v2`
-  
+
   `v2` moves most of the `inputs` to the Atmos GitOps config path `./.github/config/atmos-gitops.yaml`. Simply create this file, transfer your settings to it, then remove the corresponding arguments from your invocations of the `cloudposse/github-action-atmos-affected-stacks` action.
-  
+
   |         name             |
   |--------------------------|
   | `atmos-version`          |
@@ -350,10 +353,10 @@ usage: |-
   | `terraform-version`      |
   | `aws-region`             |
   | `enable-infracost`       |
-  
-  
+
+
   If you want the same behavior in `v2` as in `v1` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v1` inputs.
-  
+
   ```yaml
     - name: Determine Affected Stacks
       uses: cloudposse/github-action-atmos-affected-stacks@v2
@@ -362,9 +365,9 @@ usage: |-
         atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
         nested-matrices-count: 1
   ```
-  
+
   Which would produce the same behavior as in `v1`, doing this:
-  
+
   ```yaml
     - name: Determine Affected Stacks
       uses: cloudposse/github-action-atmos-affected-stacks@v1
@@ -381,14 +384,7 @@ usage: |-
         aws-region: us-east-2
         enable-infracost: false
   ```
-  
 
-include:
-  - "docs/github-action.md"
 
-# Contributors to this project
-contributors:
-  - name: "Matt Calhoun"
-    github: "mcalhoun"
-  - name: "Igor Rodionov"
-    github: "goruha"
+include: []
+contributors: []
