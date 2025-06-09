@@ -87,10 +87,6 @@ inputs:
     required: false
     description: "Skip all Atmos functions such as terraform.output"
     default: "false"
-  verbose:
-    required: false
-    description: "Whether to enable the verbose mode of the Atmos commands"
-    default: "true"
 
 outputs:
   affected:
@@ -138,8 +134,8 @@ runs:
       shell: bash
       id: config
       run: |-
-        echo "opentofu-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["opentofu-version"]')" >> $GITHUB_OUTPUT        
-        echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT      
+        echo "opentofu-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["opentofu-version"]')" >> $GITHUB_OUTPUT
+        echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT
         echo "group-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["group-by"]')" >> $GITHUB_OUTPUT
         echo "sort-by=$(atmos describe config -f json | jq -r '.integrations.github.gitops.matrix["sort-by"]')" >> $GITHUB_OUTPUT
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
@@ -196,14 +192,14 @@ runs:
         ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
       shell: bash
       run: |
-        atmos describe affected --upload --verbose=${{ inputs.verbose }} --repo-path "$GITHUB_WORKSPACE/base-ref"
+        atmos describe affected --upload --repo-path "$GITHUB_WORKSPACE/base-ref"
 
     - name: atmos affected stacks
       id: affected
       if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
-        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --verbose=${{ inputs.verbose }} --repo-path \"$GITHUB_WORKSPACE/base-ref\""
+        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --repo-path \"$GITHUB_WORKSPACE/base-ref\""
 
         if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
           base_cmd+=" --include-spacelift-admin-stacks=true"
@@ -225,7 +221,7 @@ runs:
 
         if [[ "${{ inputs.process-functions }}" == "false" ]]; then
           base_cmd+=" --process-functions=false"
-        fi        
+        fi
         eval "$base_cmd"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
