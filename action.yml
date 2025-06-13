@@ -38,7 +38,7 @@ inputs:
   atmos-pro-base-url:
     description: The base URL of Atmos Pro
     required: false
-    default: "https://app.cloudposse.com"
+    default: "https://atmos-pro.com"
   atmos-pro-token:
     description: The API token to allow Atmos Pro to upload affected stacks
     required: false
