@@ -59,6 +59,10 @@ inputs:
     description: The stack to operate on
     required: false
     default: ""
+  identity:
+    description: Atmos auth identity
+    required: false
+    default: ""
   install-jq:
     description: Whether to install jq
     required: false
@@ -222,6 +226,11 @@ runs:
         if [[ "${{ inputs.process-functions }}" == "false" ]]; then
           base_cmd+=" --process-functions=false"
         fi
+
+        if [[ -n "${{ inputs.identity }}" ]]; then
+          base_cmd+=" --identity=${{ inputs.identity }}"
+        fi
+        
         eval "$base_cmd"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
