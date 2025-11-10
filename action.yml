@@ -188,6 +188,40 @@ runs:
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
+    - name: Build atmos affected command args
+      id: affected-args
+      shell: bash
+      run: |
+        args="--include-settings=${{ inputs.atmos-include-settings }} --repo-path \"$GITHUB_WORKSPACE/base-ref\""
+
+        if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
+          args+=" --include-spacelift-admin-stacks=true"
+        elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
+          args+=" --include-dependents=true"
+        fi
+
+        if [[ -n "${{ inputs.atmos-stack }}" ]]; then
+          args+=" --stack=${{ inputs.atmos-stack }}"
+        fi
+
+        if [[ "${{ inputs.skip-atmos-functions }}" == "true" ]]; then
+          args+=" --skip=terraform.output"
+        fi
+
+        if [[ "${{ inputs.process-templates }}" == "false" ]]; then
+          args+=" --process-templates=false"
+        fi
+
+        if [[ "${{ inputs.process-functions }}" == "false" ]]; then
+          args+=" --process-functions=false"
+        fi
+
+        if [[ -n "${{ inputs.identity }}" ]]; then
+          args+=" --identity=${{ inputs.identity }}"
+        fi
+
+        echo "args=$args" >> $GITHUB_OUTPUT
+
     - name: atmos affected stacks for atmos pro
       id: affected-pro
       if: ${{ inputs.atmos-pro-upload == 'true' }}
@@ -196,42 +230,14 @@ runs:
         ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
       shell: bash
       run: |
-        atmos describe affected --upload --repo-path "$GITHUB_WORKSPACE/base-ref"
+        eval "atmos describe affected --upload ${{ steps.affected-args.outputs.args }}"
 
     - name: atmos affected stacks
       id: affected
       if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
-        base_cmd="atmos describe affected --include-settings=${{ inputs.atmos-include-settings }} --file affected-stacks.json --repo-path \"$GITHUB_WORKSPACE/base-ref\""
-
-        if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          base_cmd+=" --include-spacelift-admin-stacks=true"
-        elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
-          base_cmd+=" --include-dependents=true"
-        fi
-
-        if [[ -n "${{ inputs.atmos-stack }}" ]]; then
-          base_cmd+=" --stack=${{ inputs.atmos-stack }}"
-        fi
-
-        if [[ "${{ inputs.skip-atmos-functions }}" == "true" ]]; then
-          base_cmd+=" --skip=terraform.output"
-        fi
-
-        if [[ "${{ inputs.process-templates }}" == "false" ]]; then
-          base_cmd+=" --process-templates=false"
-        fi
-
-        if [[ "${{ inputs.process-functions }}" == "false" ]]; then
-          base_cmd+=" --process-functions=false"
-        fi
-
-        if [[ -n "${{ inputs.identity }}" ]]; then
-          base_cmd+=" --identity=${{ inputs.identity }}"
-        fi
-        
-        eval "$base_cmd"
+        eval "atmos describe affected --file affected-stacks.json ${{ steps.affected-args.outputs.args }}"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
