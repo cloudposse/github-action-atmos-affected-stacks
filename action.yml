@@ -111,7 +111,7 @@ runs:
       with:
         node-version: 20
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       if: ${{ inputs.skip-checkout != 'true' }}
       with:
         ref: ${{ inputs.head-ref }}
@@ -163,7 +163,7 @@ runs:
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
     # look at the contents of the stack files to determine if any have changed.
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       if: ${{ inputs.skip-checkout != 'true' }}
       with:
         ref: ${{ inputs.default-branch }}
