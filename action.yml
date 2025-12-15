@@ -181,7 +181,7 @@ runs:
         steps.config.outputs.aws-region != 'null' &&
         steps.config.outputs.terraform-plan-role != '' &&
         steps.config.outputs.terraform-plan-role != 'null' }}
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v5
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
