@@ -58,7 +58,7 @@ usage: |2-
 
   The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
 
-  The action supports AWS and Azure to store Terraform plan files. 
+  The action supports AWS, Azure, and GCP to store Terraform plan files.
   You can read more about plan storage in the [cloudposse/github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage?tab=readme-ov-file#aws-default) documentation. 
   Depends of cloud provider the following fields should be set in the `atmos.yaml`:
 
@@ -110,6 +110,60 @@ usage: |2-
         matrix:
           sort-by: .stack_slug
           group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+  ```
+
+  #### GCP
+
+  The config should have the following structure:
+
+  ```yaml
+  integrations:
+    github:
+      gitops:
+        opentofu-version: 1.7.3
+        terraform-version: 1.5.2
+        infracost-enabled: false
+        artifact-storage:
+          plan-repository-type: gcs
+          bucket: my-gcs-terraform-plans
+          metadata-repository-type: firestore
+          gcp-project-id: my-gcp-project
+          gcp-firestore-database-name: "(default)"
+          gcp-firestore-collection-name: terraform-plan-storage
+        # We remove the `role` section as it is AWS specific
+        matrix:
+          sort-by: .stack_slug
+          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+  ```
+
+  > [!NOTE]
+  > GCP authentication is handled outside of this action. You must authenticate with
+  > `google-github-actions/auth@v2` in a prior workflow step before calling this action.
+  > This is the same pattern used for Azure support.
+
+  ##### GCP Workflow Example
+
+  ```yaml
+  permissions:
+    contents: read
+    id-token: write  # Required for Workload Identity Federation
+
+  jobs:
+    affected:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+
+        - name: Authenticate to Google Cloud
+          uses: google-github-actions/auth@v2
+          with:
+            workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+            service_account: 'terraform-plan@my-project.iam.gserviceaccount.com'
+
+        - name: Get affected stacks
+          uses: cloudposse/github-action-atmos-affected-stacks@v5
+          with:
+            atmos-config-path: ./rootfs/usr/local/etc/atmos/
   ```
 
   ### Stack level configuration
