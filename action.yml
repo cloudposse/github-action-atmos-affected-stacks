@@ -201,95 +201,67 @@ runs:
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
+    - name: Build atmos affected command args
+      id: affected-args
+      env:
+        ATMOS_INCLUDE_SETTINGS: ${{ inputs.atmos-include-settings }}
+        ATMOS_INCLUDE_SPACELIFT: ${{ inputs.atmos-include-spacelift-admin-stacks }}
+        ATMOS_INCLUDE_DEPENDENTS: ${{ inputs.atmos-include-dependents }}
+        ATMOS_STACK: ${{ inputs.atmos-stack }}
+        SKIP_ATMOS_FUNCTIONS: ${{ inputs.skip-atmos-functions }}
+        PROCESS_TEMPLATES: ${{ inputs.process-templates }}
+        PROCESS_FUNCTIONS: ${{ inputs.process-functions }}
+        IDENTITY: ${{ inputs.identity }}
+      shell: bash
+      run: |
+        args=("--include-settings=${ATMOS_INCLUDE_SETTINGS}" "--repo-path=${GITHUB_WORKSPACE}/base-ref")
+
+        if [[ "$ATMOS_INCLUDE_SPACELIFT" == "true" ]]; then
+          args+=("--include-spacelift-admin-stacks=true")
+        elif [[ "$ATMOS_INCLUDE_DEPENDENTS" == "true" ]]; then
+          args+=("--include-dependents=true")
+        fi
+
+        if [[ -n "$ATMOS_STACK" ]]; then
+          args+=("--stack=${ATMOS_STACK}")
+        fi
+
+        if [[ "$SKIP_ATMOS_FUNCTIONS" == "true" ]]; then
+          args+=("--skip=terraform.output")
+        fi
+
+        if [[ "$PROCESS_TEMPLATES" == "false" ]]; then
+          args+=("--process-templates=false")
+        fi
+
+        if [[ "$PROCESS_FUNCTIONS" == "false" ]]; then
+          args+=("--process-functions=false")
+        fi
+
+        if [[ -n "$IDENTITY" ]]; then
+          args+=("--identity=${IDENTITY}")
+        fi
+
+        printf '%s\n' "${args[@]}" > "${RUNNER_TEMP}/atmos-affected-args"
+
     - name: atmos affected stacks for atmos pro
       id: affected-pro
       if: ${{ inputs.atmos-pro-upload == 'true' }}
       env:
         ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}
         ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
-        ATMOS_INCLUDE_SETTINGS: ${{ inputs.atmos-include-settings }}
-        ATMOS_INCLUDE_SPACELIFT: ${{ inputs.atmos-include-spacelift-admin-stacks }}
-        ATMOS_INCLUDE_DEPENDENTS: ${{ inputs.atmos-include-dependents }}
-        ATMOS_STACK: ${{ inputs.atmos-stack }}
-        SKIP_ATMOS_FUNCTIONS: ${{ inputs.skip-atmos-functions }}
-        PROCESS_TEMPLATES: ${{ inputs.process-templates }}
-        PROCESS_FUNCTIONS: ${{ inputs.process-functions }}
-        IDENTITY: ${{ inputs.identity }}
       shell: bash
       run: |
-        args=("--upload" "--include-settings=${ATMOS_INCLUDE_SETTINGS}" "--repo-path=${GITHUB_WORKSPACE}/base-ref")
-
-        if [[ "$ATMOS_INCLUDE_SPACELIFT" == "true" ]]; then
-          args+=("--include-spacelift-admin-stacks=true")
-        elif [[ "$ATMOS_INCLUDE_DEPENDENTS" == "true" ]]; then
-          args+=("--include-dependents=true")
-        fi
-
-        if [[ -n "$ATMOS_STACK" ]]; then
-          args+=("--stack=${ATMOS_STACK}")
-        fi
-
-        if [[ "$SKIP_ATMOS_FUNCTIONS" == "true" ]]; then
-          args+=("--skip=terraform.output")
-        fi
-
-        if [[ "$PROCESS_TEMPLATES" == "false" ]]; then
-          args+=("--process-templates=false")
-        fi
-
-        if [[ "$PROCESS_FUNCTIONS" == "false" ]]; then
-          args+=("--process-functions=false")
-        fi
-
-        if [[ -n "$IDENTITY" ]]; then
-          args+=("--identity=${IDENTITY}")
-        fi
-
-        atmos describe affected "${args[@]}"
+        mapfile -t args < "${RUNNER_TEMP}/atmos-affected-args"
+        atmos describe affected --upload "${args[@]}"
 
     - name: atmos affected stacks
       id: affected
       if: ${{ inputs.atmos-pro-upload == 'false' }}
-      env:
-        ATMOS_INCLUDE_SETTINGS: ${{ inputs.atmos-include-settings }}
-        ATMOS_INCLUDE_SPACELIFT: ${{ inputs.atmos-include-spacelift-admin-stacks }}
-        ATMOS_INCLUDE_DEPENDENTS: ${{ inputs.atmos-include-dependents }}
-        ATMOS_STACK: ${{ inputs.atmos-stack }}
-        SKIP_ATMOS_FUNCTIONS: ${{ inputs.skip-atmos-functions }}
-        PROCESS_TEMPLATES: ${{ inputs.process-templates }}
-        PROCESS_FUNCTIONS: ${{ inputs.process-functions }}
-        IDENTITY: ${{ inputs.identity }}
       shell: bash
       run: |
-        args=("--file=affected-stacks.json" "--include-settings=${ATMOS_INCLUDE_SETTINGS}" "--repo-path=${GITHUB_WORKSPACE}/base-ref")
-
-        if [[ "$ATMOS_INCLUDE_SPACELIFT" == "true" ]]; then
-          args+=("--include-spacelift-admin-stacks=true")
-        elif [[ "$ATMOS_INCLUDE_DEPENDENTS" == "true" ]]; then
-          args+=("--include-dependents=true")
-        fi
-
-        if [[ -n "$ATMOS_STACK" ]]; then
-          args+=("--stack=${ATMOS_STACK}")
-        fi
-
-        if [[ "$SKIP_ATMOS_FUNCTIONS" == "true" ]]; then
-          args+=("--skip=terraform.output")
-        fi
-
-        if [[ "$PROCESS_TEMPLATES" == "false" ]]; then
-          args+=("--process-templates=false")
-        fi
-
-        if [[ "$PROCESS_FUNCTIONS" == "false" ]]; then
-          args+=("--process-functions=false")
-        fi
-
-        if [[ -n "$IDENTITY" ]]; then
-          args+=("--identity=${IDENTITY}")
-        fi
-
-        atmos describe affected "${args[@]}"
+        mapfile -t args < "${RUNNER_TEMP}/atmos-affected-args"
+        atmos describe affected --file=affected-stacks.json "${args[@]}"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
