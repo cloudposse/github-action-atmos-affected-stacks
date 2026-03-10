@@ -41,6 +41,7 @@ jobs:
           mkdir -p ${{ runner.temp }}
           cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#base_path: "./tests"#base_path: "${{ github.workspace }}/tests"#g' ${{ runner.temp }}/atmos.yaml
 
       - uses: cloudposse-github-actions/install-gh-releases@v1
         with:
