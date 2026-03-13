@@ -124,7 +124,7 @@ runs:
           jqlang/jq: jq-${{ inputs.jq-version }}
 
     - if: ${{ inputs.install-atmos == 'true' }}
-      uses: cloudposse/github-action-setup-atmos@v2
+      uses: cloudposse/github-action-setup-atmos@49625d9fcea135fe450ff3baa36283ac67b21cb8 # v3
       with:
         atmos-version: ${{ inputs.atmos-version }}
         install-wrapper: false
