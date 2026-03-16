@@ -131,8 +131,10 @@ runs:
 
     - name: Set vars
       shell: bash
+      env:
+        ATMOS_CONFIG_PATH: ${{ inputs.atmos-config-path }}
       run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath "$ATMOS_CONFIG_PATH")" >> $GITHUB_ENV
 
     - name: config
       shell: bash
@@ -173,7 +175,18 @@ runs:
     - name: checkout base ref
       id: base-ref
       shell: bash
-      run: git checkout ${{ inputs.skip-checkout == 'true' && '-f' || '' }} ${{ inputs.base-ref }}
+      env:
+        BASE_REF: ${{ inputs.base-ref }}
+        SKIP_CHECKOUT: ${{ inputs.skip-checkout }}
+      run: |
+        args=()
+        if [[ "$SKIP_CHECKOUT" == "true" ]]; then
+          args+=("-f")
+        fi
+        if [[ -n "$BASE_REF" ]]; then
+          args+=("$BASE_REF")
+        fi
+        git checkout "${args[@]}"
       working-directory: base-ref
 
     - name: Configure Plan AWS Credentials
@@ -190,37 +203,46 @@ runs:
 
     - name: Build atmos affected command args
       id: affected-args
+      env:
+        ATMOS_INCLUDE_SETTINGS: ${{ inputs.atmos-include-settings }}
+        ATMOS_INCLUDE_SPACELIFT: ${{ inputs.atmos-include-spacelift-admin-stacks }}
+        ATMOS_INCLUDE_DEPENDENTS: ${{ inputs.atmos-include-dependents }}
+        ATMOS_STACK: ${{ inputs.atmos-stack }}
+        SKIP_ATMOS_FUNCTIONS: ${{ inputs.skip-atmos-functions }}
+        PROCESS_TEMPLATES: ${{ inputs.process-templates }}
+        PROCESS_FUNCTIONS: ${{ inputs.process-functions }}
+        IDENTITY: ${{ inputs.identity }}
       shell: bash
       run: |
-        args="--include-settings=${{ inputs.atmos-include-settings }} --repo-path \"$GITHUB_WORKSPACE/base-ref\""
+        args=("--include-settings=${ATMOS_INCLUDE_SETTINGS}" "--repo-path=${GITHUB_WORKSPACE}/base-ref")
 
-        if [[ "${{ inputs.atmos-include-spacelift-admin-stacks }}" == "true" ]]; then
-          args+=" --include-spacelift-admin-stacks=true"
-        elif [[ "${{ inputs.atmos-include-dependents }}" == "true" ]]; then
-          args+=" --include-dependents=true"
+        if [[ "$ATMOS_INCLUDE_SPACELIFT" == "true" ]]; then
+          args+=("--include-spacelift-admin-stacks=true")
+        elif [[ "$ATMOS_INCLUDE_DEPENDENTS" == "true" ]]; then
+          args+=("--include-dependents=true")
         fi
 
-        if [[ -n "${{ inputs.atmos-stack }}" ]]; then
-          args+=" --stack=${{ inputs.atmos-stack }}"
+        if [[ -n "$ATMOS_STACK" ]]; then
+          args+=("--stack=${ATMOS_STACK}")
         fi
 
-        if [[ "${{ inputs.skip-atmos-functions }}" == "true" ]]; then
-          args+=" --skip=terraform.output"
+        if [[ "$SKIP_ATMOS_FUNCTIONS" == "true" ]]; then
+          args+=("--skip=terraform.output")
         fi
 
-        if [[ "${{ inputs.process-templates }}" == "false" ]]; then
-          args+=" --process-templates=false"
+        if [[ "$PROCESS_TEMPLATES" == "false" ]]; then
+          args+=("--process-templates=false")
         fi
 
-        if [[ "${{ inputs.process-functions }}" == "false" ]]; then
-          args+=" --process-functions=false"
+        if [[ "$PROCESS_FUNCTIONS" == "false" ]]; then
+          args+=("--process-functions=false")
         fi
 
-        if [[ -n "${{ inputs.identity }}" ]]; then
-          args+=" --identity=${{ inputs.identity }}"
+        if [[ -n "$IDENTITY" ]]; then
+          args+=("--identity=${IDENTITY}")
         fi
 
-        echo "args=$args" >> $GITHUB_OUTPUT
+        printf '%s\n' "${args[@]}" > "${RUNNER_TEMP}/atmos-affected-args"
 
     - name: atmos affected stacks for atmos pro
       id: affected-pro
@@ -230,14 +252,16 @@ runs:
         ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
       shell: bash
       run: |
-        eval "atmos describe affected --upload ${{ steps.affected-args.outputs.args }}"
+        mapfile -t args < "${RUNNER_TEMP}/atmos-affected-args"
+        atmos describe affected --upload "${args[@]}"
 
     - name: atmos affected stacks
       id: affected
       if: ${{ inputs.atmos-pro-upload == 'false' }}
       shell: bash
       run: |
-        eval "atmos describe affected --file affected-stacks.json ${{ steps.affected-args.outputs.args }}"
+        mapfile -t args < "${RUNNER_TEMP}/atmos-affected-args"
+        atmos describe affected --file=affected-stacks.json "${args[@]}"
         affected=$(jq -c '.' affected-stacks.json)
         printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
 
