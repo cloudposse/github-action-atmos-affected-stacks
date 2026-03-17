@@ -199,7 +199,7 @@ runs:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
         role-session-name: "atmos-terraform-plan-gitops"
-        mask-aws-account-id: "no"
+        mask-aws-account-id: false
 
     - name: Build atmos affected command args
       id: affected-args
