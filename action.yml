@@ -107,16 +107,16 @@ runs:
   using: "composite"
   steps:
     - name: Install Node
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
       with:
         node-version: 24
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       if: ${{ inputs.skip-checkout != 'true' }}
       with:
         ref: ${{ inputs.head-ref }}
 
-    - uses: cloudposse-github-actions/install-gh-releases@v1
+    - uses: cloudposse-github-actions/install-gh-releases@33b15dbedceb0a3425d72f54a2300202d5c3418d # v1
       if: ${{ inputs.install-jq == 'true' }}
       with:
         cache: true
@@ -149,13 +149,13 @@ runs:
 
     - name: Install Terraform
       if: ${{ steps.config.outputs.terraform-version != '' && steps.config.outputs.terraform-version != 'null' }}
-      uses: hashicorp/setup-terraform@v4
+      uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4
       with:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
 
     - name: Install OpenTofu
-      uses: cloudposse-github-actions/install-gh-releases@v1
+      uses: cloudposse-github-actions/install-gh-releases@33b15dbedceb0a3425d72f54a2300202d5c3418d # v1
       if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
       with:
         cache: true
@@ -165,7 +165,7 @@ runs:
     # atmos describe affected requires the main branch of the git repo to be present on disk so it can compare the
     # current branch to it to determine the affected stacks. This is different from a file-based git diff in that we
     # look at the contents of the stack files to determine if any have changed.
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       if: ${{ inputs.skip-checkout != 'true' }}
       with:
         ref: ${{ inputs.default-branch }}
@@ -194,7 +194,7 @@ runs:
         steps.config.outputs.aws-region != 'null' &&
         steps.config.outputs.terraform-plan-role != '' &&
         steps.config.outputs.terraform-plan-role != 'null' }}
-      uses: aws-actions/configure-aws-credentials@v6
+      uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
@@ -271,7 +271,7 @@ runs:
       run: |-
         cat "${GITHUB_ACTION_PATH}/assets/summary.md" >> $GITHUB_STEP_SUMMARY
 
-    - uses: cloudposse/github-action-matrix-extended@v0
+    - uses: cloudposse/github-action-matrix-extended@c599eed8fa5d0b64440d8dbc7a81700fbd4c7fa5 # v0
       id: matrix
       if: ${{ inputs.atmos-pro-upload == 'false' }}
       with:
