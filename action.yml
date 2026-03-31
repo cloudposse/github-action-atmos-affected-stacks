@@ -98,7 +98,7 @@ outputs:
     value: ${{ steps.affected.outputs.affected }}
   has-affected-stacks:
     description: Whether there are affected stacks
-    value: ${{ steps.affected.outputs.affected != '[]' }}
+    value: ${{ steps.affected.outputs.has-affected-stacks }}
   matrix:
     description: The affected stacks as matrix structure suitable for extending matrix size workaround (see README)
     value: ${{ steps.matrix.outputs.matrix }}
@@ -262,11 +262,29 @@ runs:
       run: |
         mapfile -t args < "${RUNNER_TEMP}/atmos-affected-args"
         atmos describe affected --file=affected-stacks.json "${args[@]}"
-        affected=$(jq -c '.' affected-stacks.json)
-        printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
+
+        # Compute has-affected-stacks from the file (lightweight boolean output)
+        count=$(jq 'length' affected-stacks.json)
+        if [[ "$count" -gt 0 ]]; then
+          echo "has-affected-stacks=true" >> $GITHUB_OUTPUT
+        else
+          echo "has-affected-stacks=false" >> $GITHUB_OUTPUT
+        fi
+
+        # Only put the full payload in $GITHUB_OUTPUT if it's under 1MB.
+        # Larger payloads cause GitHub Actions' expression evaluator to OOM
+        # when referenced in `if` conditions of subsequent steps.
+        file_size=$(wc -c < affected-stacks.json)
+        if [[ "$file_size" -lt 1048576 ]]; then
+          affected=$(jq -c '.' affected-stacks.json)
+          printf "%s" "affected=$affected" >> $GITHUB_OUTPUT
+        else
+          echo "::warning::Affected stacks payload too large for GITHUB_OUTPUT (${file_size} bytes). Use affected-stacks.json file instead."
+          echo "affected=[]" >> $GITHUB_OUTPUT
+        fi
 
     - name: No changes summary
-      if: ${{ inputs.atmos-pro-upload == 'false' && steps.affected.outputs.affected == '[]' }}
+      if: ${{ inputs.atmos-pro-upload == 'false' && steps.affected.outputs.has-affected-stacks != 'true' }}
       shell: bash
       run: |-
         cat "${GITHUB_ACTION_PATH}/assets/summary.md" >> $GITHUB_STEP_SUMMARY
