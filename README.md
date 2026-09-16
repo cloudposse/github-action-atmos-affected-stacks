@@ -33,12 +33,12 @@
 A GitHub Action to get a list of affected atmos stacks for a pull request
 
 
+> [!WARNING]
+> **Deprecated.** Migrate to [Atmos Native CI](https://atmos.tools/deprecated/github-actions/affected-stacks).
+
 
 
 ## Introduction
-
-> [!WARNING]
-> **Deprecated.** Migrate to [Atmos Native CI](https://atmos.tools/deprecated/github-actions/affected-stacks).
 
 This action is deprecated in favor of Atmos Native CI. See the migration guide at
 https://atmos.tools/deprecated/github-actions/affected-stacks for the equivalent built-in
