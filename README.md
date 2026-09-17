@@ -37,7 +37,14 @@ A GitHub Action to get a list of affected atmos stacks for a pull request
 
 ## Introduction
 
-This is a GitHub Action to get a list of affected atmos stacks for a pull request. It optionally installs 
+> [!WARNING]
+> **Deprecated.** Migrate to [Atmos Native CI](https://atmos.tools/ci).
+
+This action is deprecated in favor of Atmos Native CI. See the migration guide at
+https://atmos.tools/deprecated/github-actions/affected-stacks for the equivalent built-in
+command (`atmos describe affected --format=matrix`) and how to move your workflow over.
+
+This is a GitHub Action to get a list of affected atmos stacks for a pull request. It optionally installs
 `atmos` and `jq` and runs `atmos describe affected` to get the list of affected stacks. It provides the 
 raw list of affected stacks as an output as well as a matrix that can be used further in GitHub action jobs.
 
@@ -389,6 +396,10 @@ Which would produce the same behavior as in `v1`, doing this:
 
 
 
+
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
 
 ## Inputs
 <!-- markdownlint-disable -->
