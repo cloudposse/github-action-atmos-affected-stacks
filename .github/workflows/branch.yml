@@ -22,5 +22,5 @@ permissions:
 
 jobs:
   github-action:
-    uses: cloudposse/.github/.github/workflows/shared-github-action.yml@main
+    uses: cloudposse/.github/.github/workflows/shared-github-action.yml@281621d6f2e63a883ea884559ffdbb4895c1bd98 # main
     secrets: inherit
