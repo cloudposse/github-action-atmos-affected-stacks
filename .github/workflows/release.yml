@@ -10,5 +10,5 @@ permissions:
 
 jobs:
   github-action:
-    uses: cloudposse/.github/.github/workflows/shared-release-branches.yml@main
+    uses: cloudposse/.github/.github/workflows/shared-release-branches.yml@aaa06b35f8203f0a1a98aea716e65eb9e072038e # main
     secrets: inherit
